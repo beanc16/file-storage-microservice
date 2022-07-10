@@ -18,7 +18,10 @@ const { CloudinaryController } = require("../../../../js/controllers");
 
 
 // Response
-const { Success } = require("dotnet-responses");
+const {
+    Success,
+    InternalServerError,
+} = require("dotnet-responses");
 
 
 
@@ -46,11 +49,27 @@ app.get("/", function(req, res)
  * POSTS *
  *********/
 
-app.post("/", function(req, res)
+app.post("/single", function(req, res)
 {
-    Success.json({
-        res,
-        message: "Pong",
+    CloudinaryController.upload({ fileName: "bugcatStareRight.png" })
+    .then(function (result)
+    {
+        Success.json({
+            res,
+            message: "Success!",
+            data: {
+                url: result.url,
+            },
+        });
+    })
+    .catch(function (err)
+    {
+        console.log("err:", err);
+        InternalServerError.json({
+            res,
+            message: "Failed to save image to Cloudinary",
+            error: err.toJson(),
+        });
     });
 });
 
