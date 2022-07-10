@@ -36,6 +36,7 @@ class CloudinaryController
             // Upload file to cloudinary
             cloudinary.uploader.upload(localFilePath, {
                 "public_id": cloudinaryFilePath,
+                overwrite: false,
             })
             .then((result) => {
                 // Delete file locally
