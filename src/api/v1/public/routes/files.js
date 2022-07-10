@@ -49,7 +49,7 @@ app.get("/", function(req, res)
  * POSTS *
  *********/
 
-app.post("/single", function(req, res)
+app.post("/upload", function(req, res)
 {
     CloudinaryController.upload({ fileName: "bugcatStareRight.png" })
     .then(function (result)
