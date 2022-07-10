@@ -64,7 +64,6 @@ app.post("/single", function(req, res)
     })
     .catch(function (err)
     {
-        console.log("err:", err);
         InternalServerError.json({
             res,
             message: "Failed to save image to Cloudinary",
