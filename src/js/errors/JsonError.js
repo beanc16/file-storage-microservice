@@ -5,13 +5,19 @@ class JsonError extends Error
         this.name = "JsonError";
     }
 
-    toJson()
+    toJson({ includeStackTrace = false } = {})
     {
-        return {
+        const result = {
             name: this.name,
             message: this.message,
-            stackTrace: this.stack,
+        };
+
+        if (includeStackTrace)
+        {
+            result.stackTrace = this.stack;
         }
+
+        return result;
     }
 }
 
