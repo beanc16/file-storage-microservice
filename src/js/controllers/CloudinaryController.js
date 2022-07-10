@@ -14,7 +14,11 @@ const { FileDoesNotExistError, JsonError } = require("../errors");
 
 class CloudinaryController
 {
-    static async upload({ appName = "file-storage-microservice", nestedFolders, fileName })
+    static async upload({
+        appName = "file-storage-microservice",
+        nestedFolders,
+        fileName,
+    })
     {
         return new Promise((resolve, reject) =>
         {
@@ -46,6 +50,35 @@ class CloudinaryController
         });
     }
 
+    static async rename({
+        appName = "file-storage-microservice",
+        oldNestedFolders,
+        oldFileName,
+        newNestedFolders,
+        newFileName,
+    })
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath: oldCloudinaryFilePath,
+            } = this._constructFilePaths(appName, oldNestedFolders, oldFileName);
+            const {
+                cloudinaryFilePath: newCloudinaryFilePath,
+            } = this._constructFilePaths(appName, newNestedFolders, newFileName);
+    
+            // Rename file in cloudinary
+            cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath)
+            .then((result) => {
+                resolve(result);
+            })
+            .catch((err) => {
+                reject(new JsonError(err));
+            });
+        });
+    }
+
 
 
     /***********
@@ -58,8 +91,10 @@ class CloudinaryController
         const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
 
         // Cloudinary path
-        const fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf("."));
-        const cloudinaryFilePath = `apps/${appName}/${`${nestedFolders}/` || ""}${fileNameWithoutExtension}`;
+        const fileNameWithoutExtension = (fileName.lastIndexOf(".") !== -1)
+            ? fileName.substring(0, fileName.lastIndexOf("."))
+            : fileName;
+        const cloudinaryFilePath = `apps/${appName}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}`;
         
         return {
             localFilePath,

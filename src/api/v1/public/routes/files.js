@@ -20,6 +20,7 @@ const { CloudinaryController } = require("../../../../js/controllers");
 // Response
 const {
     Success,
+    NotFound,
     InternalServerError,
 } = require("dotnet-responses");
 
@@ -56,7 +57,7 @@ app.post("/upload", function(req, res)
     {
         Success.json({
             res,
-            message: "Success!",
+            message: "Successfully saved image to Cloudinary",
             data: {
                 url: result.url,
             },
@@ -80,15 +81,44 @@ app.post("/upload", function(req, res)
  * PATCHES *
  ***********/
 
-/*
-app.patch("/", function(req, res)
+app.patch("/rename", function(req, res)
 {
-    Success.json({
-        res,
-        message: "Pong",
+    CloudinaryController.rename({ oldFileName: "bugcatStareRight", newFileName: "bcStareRight" })
+    //CloudinaryController.rename({ oldFileName: "bcStareRight", newFileName: "bugcatStareRight" })
+    .then(function (result)
+    {
+        console.log("\n result:", result);
+        Success.json({
+            res,
+            message: "Successfully renamed image on Cloudinary",
+            data: {
+                url: result.url,
+            },
+        });
+    })
+    .catch(function (err)
+    {
+        const { statusCode } = err;
+
+        if (statusCode === 404)
+        {
+            NotFound.json({
+                res,
+                message: "That image does not exist on Cloudinary",
+                error: err.toJson(),
+            });
+        }
+
+        else
+        {
+            InternalServerError.json({
+                res,
+                message: "Failed to rename image on Cloudinary",
+                error: err.toJson(),
+            });
+        }
     });
 });
-*/
 
 
 
