@@ -87,7 +87,6 @@ app.patch("/rename", function(req, res)
     //CloudinaryController.rename({ oldFileName: "bcStareRight", newFileName: "bugcatStareRight" })
     .then(function (result)
     {
-        console.log("\n result:", result);
         Success.json({
             res,
             message: "Successfully renamed image on Cloudinary",
@@ -128,15 +127,25 @@ app.patch("/rename", function(req, res)
  * DELETES *
  ***********/
 
-/*
-app.delete("/", function(req, res)
+app.delete("/delete", function(req, res)
 {
-    Success.json({
-        res,
-        message: "Pong",
+    CloudinaryController.delete({ fileName: "bugcatStareRight" })
+    .then(function (result)
+    {
+        Success.json({
+            res,
+            message: "Successfully deleted image from Cloudinary",
+        });
+    })
+    .catch(function (err)
+    {
+        InternalServerError.json({
+            res,
+            message: "Failed to delete image from Cloudinary",
+            error: err.toJson(),
+        });
     });
 });
-*/
 
 
 

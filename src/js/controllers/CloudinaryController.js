@@ -80,6 +80,30 @@ class CloudinaryController
         });
     }
 
+    static async delete({
+        appName = "file-storage-microservice",
+        nestedFolders,
+        fileName,
+    })
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this._constructFilePaths(appName, nestedFolders, fileName);
+    
+            // Upload file to cloudinary
+            cloudinary.uploader.destroy(cloudinaryFilePath)
+            .then((result) => {
+                resolve(result);
+            })
+            .catch((err) => {
+                reject(new JsonError(err));
+            });
+        });
+    }
+
 
 
     /***********
