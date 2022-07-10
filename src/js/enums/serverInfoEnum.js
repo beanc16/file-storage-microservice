@@ -1,12 +1,11 @@
 // Development environment
-const devPort = 8000;
+const devPort = 8002;
 const devBaseUrl = "http://localhost";
 const devUrl = `${devBaseUrl}:${devPort}`;
 
 // Production environment
 const prodPort = 80;
-// TODO: Update prodUrl
-const prodUrl = "https://template-microservice-api.herokuapp.com";
+const prodUrl = "https://file-storage-microservice.herokuapp.com";
 
 
 
