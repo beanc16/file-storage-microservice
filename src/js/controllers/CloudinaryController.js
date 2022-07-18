@@ -81,7 +81,7 @@ class CloudinaryController
     }
 
     static async rename({
-        appName = "file-storage-microservice",
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         old: {
             nestedFolders: oldNestedFolders,
             fileName: oldFileName,
@@ -100,10 +100,10 @@ class CloudinaryController
             // Get file paths
             const {
                 cloudinaryFilePath: oldCloudinaryFilePath,
-            } = this._constructFilePaths(appName, oldNestedFolders, oldFileName);
+            } = this._constructFilePaths(appId, oldNestedFolders, oldFileName);
             const {
                 cloudinaryFilePath: newCloudinaryFilePath,
-            } = this._constructFilePaths(appName, newNestedFolders, newFileName);
+            } = this._constructFilePaths(appId, newNestedFolders, newFileName);
     
             // Rename file in cloudinary
             cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options)

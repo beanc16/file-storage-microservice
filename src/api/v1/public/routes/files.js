@@ -46,6 +46,7 @@ app.get("/", function(req, res)
     .then(function (result)
     {
         const app = result.data.data[0];
+
         CloudinaryController.get({
             ...req.query,
             appId: app._id,
@@ -84,7 +85,7 @@ app.get("/", function(req, res)
             }
         });
     })
-    .catch((err) => sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
 
 
@@ -101,6 +102,7 @@ app.post("/upload", function(req, res)
     .then(function (result)
     {
         const app = result.data.data[0];
+
         CloudinaryController.upload({
             ...req.body,
             app: undefined,
@@ -125,7 +127,7 @@ app.post("/upload", function(req, res)
             });
         });
     })
-    .catch((err) => sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
 
 
@@ -138,39 +140,50 @@ app.post("/upload", function(req, res)
 
 app.patch("/rename", function(req, res)
 {
-    CloudinaryController.rename(req.body)
+    AppMicroservice.v1.get(req.body.app)
     .then(function (result)
     {
-        Success.json({
-            res,
-            message: "Successfully renamed file on Cloudinary",
-            data: {
-                url: result.url,
-            },
+        const app = result.data.data[0];
+
+        CloudinaryController.rename({
+            ...req.body,
+            app: undefined,
+            appId: app._id,
+        })
+        .then(function (result)
+        {
+            Success.json({
+                res,
+                message: "Successfully renamed file on Cloudinary",
+                data: {
+                    url: result.url,
+                },
+            });
+        })
+        .catch(function (err)
+        {
+            const { statusCode } = err;
+
+            if (statusCode === 404)
+            {
+                NotFound.json({
+                    res,
+                    message: "That file does not exist on Cloudinary",
+                    error: err.toJson(),
+                });
+            }
+
+            else
+            {
+                InternalServerError.json({
+                    res,
+                    message: "Failed to rename file on Cloudinary",
+                    error: err.toJson(),
+                });
+            }
         });
     })
-    .catch(function (err)
-    {
-        const { statusCode } = err;
-
-        if (statusCode === 404)
-        {
-            NotFound.json({
-                res,
-                message: "That file does not exist on Cloudinary",
-                error: err.toJson(),
-            });
-        }
-
-        else
-        {
-            InternalServerError.json({
-                res,
-                message: "Failed to rename file on Cloudinary",
-                error: err.toJson(),
-            });
-        }
-    });
+    .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
 
 
@@ -209,7 +222,7 @@ app.delete("/delete", function(req, res)
  * HELPERS *
  ***********/
 
-function sendAppMicroserviceError(req, res, err)
+function _sendAppMicroserviceError(req, res, err)
 {
     const statusCode = (err && err.response && err.response.status)
         ? err.response.status
