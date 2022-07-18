@@ -14,10 +14,38 @@ const { FileDoesNotExistError, JsonError } = require("../errors");
 
 class CloudinaryController
 {
+    static async get({
+        appName = "file-storage-microservice",
+        nestedFolders,
+        fileName,
+        options = {},
+    })
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this._constructFilePaths(appName, nestedFolders, fileName);
+
+            // Get file from cloudinary
+            cloudinary.api.resource(cloudinaryFilePath, options)
+            .then((result) => {
+                resolve(result);
+            })
+            .catch((err) => {
+                reject(new JsonError(err));
+            });
+        });
+    }
+
     static async upload({
         appName = "file-storage-microservice",
         nestedFolders,
         fileName,
+        options = {
+            overwrite: false,
+        },
     })
     {
         return new Promise((resolve, reject) =>
@@ -35,8 +63,8 @@ class CloudinaryController
     
             // Upload file to cloudinary
             cloudinary.uploader.upload(localFilePath, {
+                ...options,
                 "public_id": cloudinaryFilePath,
-                overwrite: false,
             })
             .then((result) => {
                 // Delete file locally
@@ -57,6 +85,9 @@ class CloudinaryController
         oldFileName,
         newNestedFolders,
         newFileName,
+        options = {
+            invalidate: true,
+        },
     })
     {
         return new Promise((resolve, reject) =>
@@ -70,7 +101,7 @@ class CloudinaryController
             } = this._constructFilePaths(appName, newNestedFolders, newFileName);
     
             // Rename file in cloudinary
-            cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath)
+            cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options)
             .then((result) => {
                 resolve(result);
             })
@@ -84,6 +115,9 @@ class CloudinaryController
         appName = "file-storage-microservice",
         nestedFolders,
         fileName,
+        options = {
+            invalidate: true,
+        },
     })
     {
         return new Promise((resolve, reject) =>
@@ -94,7 +128,7 @@ class CloudinaryController
             } = this._constructFilePaths(appName, nestedFolders, fileName);
     
             // Upload file to cloudinary
-            cloudinary.uploader.destroy(cloudinaryFilePath)
+            cloudinary.uploader.destroy(cloudinaryFilePath, options)
             .then((result) => {
                 resolve(result);
             })
