@@ -8,6 +8,10 @@ class JsonError extends Error
         {
             this.statusCode = err.http_code;
         }
+        else if (err.error && err.error.http_code)
+        {
+            this.statusCode = err.error.http_code;
+        }
     }
 
     toJson({ includeStackTrace = false, includeStatusCode = false } = {})
