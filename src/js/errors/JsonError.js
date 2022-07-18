@@ -1,7 +1,7 @@
 class JsonError extends Error
 {
     constructor(err) {
-        super(err.message);
+        super(err.message || err.error.message);
         this.name = "JsonError";
 
         if (err.http_code)
