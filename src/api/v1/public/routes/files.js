@@ -25,6 +25,7 @@ const { CloudinaryController } = require("../../../../js/controllers");
 const {
     validateGetFilesPayload,
     validateUploadFilesPayload,
+    validateDeleteFilesPayload,
 } = require("../validation");
 
 
@@ -210,21 +211,26 @@ function _sendCloudinaryRenameError(res, err)
 
 app.delete("/delete", function(req, res)
 {
-    AppMicroservice.v1.get(req.body.app)
-    .then(function (result)
+    validateDeleteFilesPayload(req.body)
+    .then(function (_)
     {
-        const app = result.data.data[0];
-
-        CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
-        .then(function (getResult)
+        AppMicroservice.v1.get(req.body.app)
+        .then(function (result)
         {
-            CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
-            .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
-            .catch((err) => _sendCloudinaryDeleteError(res, err));
+            const app = result.data.data[0];
+    
+            CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
+            .then(function (getResult)
+            {
+                CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
+                .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
+                .catch((err) => _sendCloudinaryDeleteError(res, err));
+            })
+            .catch((err) => _sendCloudinaryGetError(res, err));
         })
-        .catch((err) => _sendCloudinaryGetError(res, err));
+        .catch((err) => _sendAppMicroserviceError(req, res, err));
     })
-    .catch((err) => _sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendPayloadValidationError(res, err));
 });
 
 function _sendCloudinaryDeleteSuccess(res, result)
