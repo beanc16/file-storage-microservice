@@ -1,5 +1,5 @@
 const getValidators = require("./get");
-//const createValidators = require("./create");
+const uploadValidators = require("./upload");
 //const updateValidators = require("./update");
 //const deleteValidators = require("./delete");
 
@@ -7,7 +7,7 @@ const getValidators = require("./get");
 
 module.exports = {
     ...getValidators,
-    //...createValidators,
+    ...uploadValidators,
     //...updateValidators,
     //...deleteValidators,
 };
