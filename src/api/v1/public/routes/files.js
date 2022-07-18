@@ -83,7 +83,7 @@ app.get("/", function(req, res)
 
 app.post("/upload", function(req, res)
 {
-    CloudinaryController.upload({ fileName: "bugcatStareRight.png" })
+    CloudinaryController.upload(req.body)
     .then(function (result)
     {
         Success.json({
@@ -114,8 +114,7 @@ app.post("/upload", function(req, res)
 
 app.patch("/rename", function(req, res)
 {
-    CloudinaryController.rename({ oldFileName: "bugcatStareRight", newFileName: "bcStareRight" })
-    //CloudinaryController.rename({ oldFileName: "bcStareRight", newFileName: "bugcatStareRight" })
+    CloudinaryController.rename(req.body)
     .then(function (result)
     {
         Success.json({
@@ -160,7 +159,7 @@ app.patch("/rename", function(req, res)
 
 app.delete("/delete", function(req, res)
 {
-    CloudinaryController.delete({ fileName: "oof_y38hyq" })
+    CloudinaryController.delete(req.body)
     .then(function (result)
     {
         Success.json({
