@@ -25,6 +25,7 @@ const { CloudinaryController } = require("../../../../js/controllers");
 const {
     validateGetFilesPayload,
     validateUploadFilesPayload,
+    validateRenameFilesPayload,
     validateDeleteFilesPayload,
 } = require("../validation");
 
@@ -155,16 +156,22 @@ function _sendCloudinaryUploadError(res, err)
 
 app.patch("/rename", function(req, res)
 {
-    AppMicroservice.v1.get(req.body.app)
-    .then(function (result)
-    {
-        const app = result.data.data[0];
 
-        CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
-        .then((result) => _sendCloudinaryRenameSuccess(res, result))
-        .catch((err) => _sendCloudinaryRenameError(res, err));
+    validateRenameFilesPayload(req.body)
+    .then(function (_)
+    {
+        AppMicroservice.v1.get(req.body.app)
+        .then(function (result)
+        {
+            const app = result.data.data[0];
+    
+            CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
+            .then((result) => _sendCloudinaryRenameSuccess(res, result))
+            .catch((err) => _sendCloudinaryRenameError(res, err));
+        })
+        .catch((err) => _sendAppMicroserviceError(req, res, err));
     })
-    .catch((err) => _sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendPayloadValidationError(res, err));
 });
 
 function _sendCloudinaryRenameSuccess(res, result)
