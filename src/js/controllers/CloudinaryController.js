@@ -41,7 +41,7 @@ class CloudinaryController
     }
 
     static async upload({
-        appName = "file-storage-microservice",
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
         fileName,
         options = {
@@ -55,7 +55,7 @@ class CloudinaryController
             const {
                 localFilePath,
                 cloudinaryFilePath,
-            } = this._constructFilePaths(appName, nestedFolders, fileName);
+            } = this._constructFilePaths(appId, nestedFolders, fileName);
 
             if (!fs.existsSync(localFilePath))
             {

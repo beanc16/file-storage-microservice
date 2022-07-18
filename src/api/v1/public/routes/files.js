@@ -49,7 +49,7 @@ app.get("/", function(req, res)
         CloudinaryController.get({
             ...req.query,
             appId: app._id,
-            appName: app.searchName,
+            appName: undefined,
         })
         .then(function (result)
         {
@@ -84,35 +84,7 @@ app.get("/", function(req, res)
             }
         });
     })
-    .catch(function (err)
-    {
-        const statusCode = (err && err.response && err.response.status)
-            ? err.response.status
-            : 500;
-
-        if (statusCode === 422)
-        {
-            ValidationError.json({
-                res,
-                message: "Invalid appName",
-                data: {
-                    ...req.query,
-                    appName: req.query.appName || null,
-                },
-                error: err.response.data.error,
-            });
-        }
-
-        else
-        {
-            InternalServerError.json({
-                res,
-                message: "An unknown error occurred while validating appName",
-                data: req.query,
-                error: err.response.data.error || err,
-            });
-        }
-    });
+    .catch((err) => sendAppMicroserviceError(req, res, err));
 });
 
 
@@ -125,25 +97,35 @@ app.get("/", function(req, res)
 
 app.post("/upload", function(req, res)
 {
-    CloudinaryController.upload(req.body)
+    AppMicroservice.v1.get(req.body.app)
     .then(function (result)
     {
-        Success.json({
-            res,
-            message: "Successfully saved file to Cloudinary",
-            data: {
-                url: result.url,
-            },
+        const app = result.data.data[0];
+        CloudinaryController.upload({
+            ...req.body,
+            app: undefined,
+            appId: app._id,
+        })
+        .then(function (result)
+        {
+            Success.json({
+                res,
+                message: "Successfully saved file to Cloudinary",
+                data: {
+                    url: result.url,
+                },
+            });
+        })
+        .catch(function (err)
+        {
+            InternalServerError.json({
+                res,
+                message: "Failed to save file to Cloudinary",
+                error: err.toJson(),
+            });
         });
     })
-    .catch(function (err)
-    {
-        InternalServerError.json({
-            res,
-            message: "Failed to save file to Cloudinary",
-            error: err.toJson(),
-        });
-    });
+    .catch((err) => sendAppMicroserviceError(req, res, err));
 });
 
 
@@ -218,6 +200,45 @@ app.delete("/delete", function(req, res)
         });
     });
 });
+
+
+
+
+
+/***********
+ * HELPERS *
+ ***********/
+
+function sendAppMicroserviceError(req, res, err)
+{
+    const statusCode = (err && err.response && err.response.status)
+        ? err.response.status
+        : 500;
+
+    if (statusCode === 422)
+    {
+        ValidationError.json({
+            res,
+            message: "Invalid appId or appName",
+            data: {
+                ...req.query,
+                appId: req.query.appId || null,
+                appName: req.query.appName || null,
+            },
+            error: err.response.data.error,
+        });
+    }
+
+    else
+    {
+        InternalServerError.json({
+            res,
+            message: "An unknown error occurred while validating appId and appName",
+            data: req.query,
+            error: err.response.data.error || err,
+        });
+    }
+}
 
 
 
