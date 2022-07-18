@@ -144,41 +144,45 @@ app.patch("/rename", function(req, res)
         const app = result.data.data[0];
 
         CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
-        .then(function (result)
-        {
-            Success.json({
-                res,
-                message: "Successfully renamed file on Cloudinary",
-                data: {
-                    url: result.url,
-                },
-            });
-        })
-        .catch(function (err)
-        {
-            const { statusCode } = err;
-
-            if (statusCode === 404)
-            {
-                NotFound.json({
-                    res,
-                    message: "That file does not exist on Cloudinary",
-                    error: err.toJson(),
-                });
-            }
-
-            else
-            {
-                InternalServerError.json({
-                    res,
-                    message: "Failed to rename file on Cloudinary",
-                    error: err.toJson(),
-                });
-            }
-        });
+        .then((result) => _sendCloudinaryRenameSuccess(res, result))
+        .catch((err) => _sendCloudinaryRenameError(res, err));
     })
     .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
+
+function _sendCloudinaryRenameSuccess(res, result)
+{
+    Success.json({
+        res,
+        message: "Successfully renamed file on Cloudinary",
+        data: {
+            url: result.url,
+        },
+    });
+}
+
+function _sendCloudinaryRenameError(res, err)
+{
+    const { statusCode } = err;
+
+    if (statusCode === 404)
+    {
+        NotFound.json({
+            res,
+            message: "That file does not exist on Cloudinary",
+            error: err.toJson(),
+        });
+    }
+
+    else
+    {
+        InternalServerError.json({
+            res,
+            message: "Failed to rename file on Cloudinary",
+            error: err.toJson(),
+        });
+    }
+}
 
 
 
