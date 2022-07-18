@@ -25,6 +25,7 @@ const { CloudinaryController } = require("../../../../js/controllers");
 const {
     Success,
     NotFound,
+    ValidationError,
     InternalServerError,
 } = require("dotnet-responses");
 
@@ -38,27 +39,67 @@ const {
 
 app.get("/", function(req, res)
 {
-    CloudinaryController.get(req.query)
+    AppMicroservice.v1.get({
+        id: (req.query.appId) || process.env.FILE_STORAGE_MICROSERVICE_APP_ID || undefined,
+        searchName: req.query.appName || undefined,
+    })
     .then(function (result)
     {
-        Success.json({
-            res,
-            message: "Successfully retrieved file from Cloudinary",
-            data: {
-                url: result.url,
-            },
+        const app = result.data.data[0];
+        CloudinaryController.get({
+            ...req.query,
+            appId: app._id,
+            appName: app.searchName,
+        })
+        .then(function (result)
+        {
+            Success.json({
+                res,
+                message: "Successfully retrieved file from Cloudinary",
+                data: {
+                    url: result.url,
+                },
+            });
+        })
+        .catch(function (err)
+        {
+            const { statusCode } = err;
+
+            if (statusCode === 404)
+            {
+                NotFound.json({
+                    res,
+                    message: "That file does not exist on Cloudinary",
+                    error: err.toJson(),
+                });
+            }
+
+            else
+            {
+                InternalServerError.json({
+                    res,
+                    message: "Failed to retrieve file from Cloudinary",
+                    error: err.toJson(),
+                });
+            }
         });
     })
     .catch(function (err)
     {
-        const { statusCode } = err;
+        const statusCode = (err && err.response && err.response.status)
+            ? err.response.status
+            : 500;
 
-        if (statusCode === 404)
+        if (statusCode === 422)
         {
-            NotFound.json({
+            ValidationError.json({
                 res,
-                message: "That file does not exist on Cloudinary",
-                error: err.toJson(),
+                message: "Invalid appName",
+                data: {
+                    ...req.query,
+                    appName: req.query.appName || null,
+                },
+                error: err.response.data.error,
             });
         }
 
@@ -66,8 +107,9 @@ app.get("/", function(req, res)
         {
             InternalServerError.json({
                 res,
-                message: "Failed to retrieve file from Cloudinary",
-                error: err.toJson(),
+                message: "An unknown error occurred while validating appName",
+                data: req.query,
+                error: err.response.data.error || err,
             });
         }
     });

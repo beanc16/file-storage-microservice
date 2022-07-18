@@ -15,7 +15,7 @@ const { FileDoesNotExistError, JsonError } = require("../errors");
 class CloudinaryController
 {
     static async get({
-        appName = "file-storage-microservice",
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
         fileName,
         options = {
@@ -27,7 +27,7 @@ class CloudinaryController
             // Get file paths
             const {
                 cloudinaryFilePath,
-            } = this._constructFilePaths(appName, nestedFolders, fileName);
+            } = this._constructFilePaths(appId, nestedFolders, fileName);
 
             // Get file from cloudinary
             cloudinary.api.resource(cloudinaryFilePath, options)
@@ -149,7 +149,7 @@ class CloudinaryController
      * HELPERS *
      ***********/
 
-    static _constructFilePaths(appName, nestedFolders, fileName)
+    static _constructFilePaths(appId, nestedFolders, fileName)
     {
         // Local path
         const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
@@ -158,7 +158,7 @@ class CloudinaryController
         const fileNameWithoutExtension = (fileName.lastIndexOf(".") !== -1)
             ? fileName.substring(0, fileName.lastIndexOf("."))
             : fileName;
-        const cloudinaryFilePath = `apps/${appName}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}`;
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}`;
         
         return {
             localFilePath,
