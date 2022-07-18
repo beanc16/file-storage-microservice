@@ -38,7 +38,7 @@ const {
 
 app.get("/", function(req, res)
 {
-    CloudinaryController.get({ fileName: "oof_y38hyq" })
+    CloudinaryController.get(req.query)
     .then(function (result)
     {
         Success.json({
