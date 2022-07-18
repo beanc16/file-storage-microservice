@@ -39,33 +39,28 @@ const {
 
 app.get("/", function(req, res)
 {
-    AppMicroservice.v1.get({
-        id: (req.query.appId) || process.env.FILE_STORAGE_MICROSERVICE_APP_ID || undefined,
-        searchName: req.query.appName || undefined,
-    })
+    AppMicroservice.v1.get(_getAppDataFromQuery(req))
     .then(function (result)
     {
         const app = result.data.data[0];
 
-        CloudinaryController.get({
-            ...req.query,
-            appId: app._id,
-            appName: undefined,
-        })
-        .then(function (result)
-        {
-            Success.json({
-                res,
-                message: "Successfully retrieved file from Cloudinary",
-                data: {
-                    url: result.url,
-                },
-            });
-        })
+        CloudinaryController.get(_getCloudinaryDataFromQuery(req, app))
+        .then((result) => _sendCloudinaryGetSuccess(res, result))
         .catch((err) => _sendCloudinaryGetError(res, err));
     })
     .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
+
+function _sendCloudinaryGetSuccess(res, result)
+{
+    Success.json({
+        res,
+        message: "Successfully retrieved file from Cloudinary",
+        data: {
+            url: result.url,
+        },
+    });
+}
 
 function _sendCloudinaryGetError(res, err)
 {
@@ -269,6 +264,23 @@ function _sendAppMicroserviceError(req, res, err)
             error: err.response.data.error || err,
         });
     }
+}
+
+function _getAppDataFromQuery(req)
+{
+    return {
+        id: (req.query.appId) || process.env.FILE_STORAGE_MICROSERVICE_APP_ID || undefined,
+        searchName: req.query.appName || undefined,
+    };
+}
+
+function _getCloudinaryDataFromQuery(req, app)
+{
+    return {
+        ...req.query,
+        appId: app._id,
+        appName: undefined,
+    };
 }
 
 function _getCloudinaryDataFromBody(req, app)
