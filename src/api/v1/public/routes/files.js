@@ -24,6 +24,7 @@ const { CloudinaryController } = require("../../../../js/controllers");
 // Validation
 const {
     validateGetFilesPayload,
+    validateUploadFilesPayload,
 } = require("../validation");
 
 
@@ -106,16 +107,21 @@ function _sendCloudinaryGetError(res, err)
 
 app.post("/upload", function(req, res)
 {
-    AppMicroservice.v1.get(req.body.app)
-    .then(function (result)
+    validateUploadFilesPayload(req.body)
+    .then(function (_)
     {
-        const app = result.data.data[0];
+        AppMicroservice.v1.get(req.body.app)
+        .then(function (result)
+        {
+            const app = result.data.data[0];
 
-        CloudinaryController.upload(_getCloudinaryDataFromBody(req, app))
-        .then((result) => _sendCloudinaryUploadSuccess(res, result))
-        .catch((err) => _sendCloudinaryUploadError(res, err));
+            CloudinaryController.upload(_getCloudinaryDataFromBody(req, app))
+            .then((result) => _sendCloudinaryUploadSuccess(res, result))
+            .catch((err) => _sendCloudinaryUploadError(res, err));
+        })
+        .catch((err) => _sendAppMicroserviceError(req, res, err));
     })
-    .catch((err) => _sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendPayloadValidationError(res, err));
 });
 
 function _sendCloudinaryUploadSuccess(res, result)
@@ -251,6 +257,14 @@ function _sendQueryValidationError(res, err)
     ValidationError.json({
         res,
         message: "Query Validation Error",
+        error: err,
+    });
+}
+
+function _sendPayloadValidationError(res, err)
+{
+    ValidationError.json({
+        res,
         error: err,
     });
 }
