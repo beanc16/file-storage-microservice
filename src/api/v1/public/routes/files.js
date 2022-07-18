@@ -62,31 +62,33 @@ app.get("/", function(req, res)
                 },
             });
         })
-        .catch(function (err)
-        {
-            const { statusCode } = err;
-
-            if (statusCode === 404)
-            {
-                NotFound.json({
-                    res,
-                    message: "That file does not exist on Cloudinary",
-                    error: err.toJson(),
-                });
-            }
-
-            else
-            {
-                InternalServerError.json({
-                    res,
-                    message: "Failed to retrieve file from Cloudinary",
-                    error: err.toJson(),
-                });
-            }
-        });
+        .catch((err) => _sendCloudinaryGetError(res, err));
     })
     .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
+
+function _sendCloudinaryGetError(res, err)
+{
+    const { statusCode } = err;
+
+    if (statusCode === 404)
+    {
+        NotFound.json({
+            res,
+            message: "That file does not exist on Cloudinary",
+            error: err.toJson(),
+        });
+    }
+
+    else
+    {
+        InternalServerError.json({
+            res,
+            message: "Failed to retrieve file from Cloudinary",
+            error: err.toJson(),
+        });
+    }
+}
 
 
 
@@ -103,11 +105,7 @@ app.post("/upload", function(req, res)
     {
         const app = result.data.data[0];
 
-        CloudinaryController.upload({
-            ...req.body,
-            app: undefined,
-            appId: app._id,
-        })
+        CloudinaryController.upload(_getCloudinaryDataFromBody(req, app))
         .then(function (result)
         {
             Success.json({
@@ -145,11 +143,7 @@ app.patch("/rename", function(req, res)
     {
         const app = result.data.data[0];
 
-        CloudinaryController.rename({
-            ...req.body,
-            app: undefined,
-            appId: app._id,
-        })
+        CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
         .then(function (result)
         {
             Success.json({
@@ -196,23 +190,39 @@ app.patch("/rename", function(req, res)
 
 app.delete("/delete", function(req, res)
 {
-    CloudinaryController.delete(req.body)
+    AppMicroservice.v1.get(req.body.app)
     .then(function (result)
     {
-        Success.json({
-            res,
-            message: "Successfully deleted file from Cloudinary",
-        });
+        const app = result.data.data[0];
+
+        CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
+        .then(function (getResult)
+        {
+            CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
+            .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
+            .catch((err) => _sendCloudinaryDeleteError(res, err));
+        })
+        .catch((err) => _sendCloudinaryGetError(res, err));
     })
-    .catch(function (err)
-    {
-        InternalServerError.json({
-            res,
-            message: "Failed to delete file from Cloudinary",
-            error: err.toJson(),
-        });
-    });
+    .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
+
+function _sendCloudinaryDeleteSuccess(res, result)
+{
+    Success.json({
+        res,
+        message: "Successfully deleted file from Cloudinary",
+    });
+}
+
+function _sendCloudinaryDeleteError(res, err)
+{
+    InternalServerError.json({
+        res,
+        message: "Failed to delete file from Cloudinary",
+        error: err.toJson(),
+    });
+}
 
 
 
@@ -251,6 +261,15 @@ function _sendAppMicroserviceError(req, res, err)
             error: err.response.data.error || err,
         });
     }
+}
+
+function _getCloudinaryDataFromBody(req, app)
+{
+    return {
+        ...req.body,
+        app: undefined,
+        appId: app._id,
+    };
 }
 
 
