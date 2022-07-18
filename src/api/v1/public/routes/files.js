@@ -21,6 +21,12 @@ const { AppMicroservice } = require("@beanc16/microservices-abstraction");
 const { CloudinaryController } = require("../../../../js/controllers");
 
 
+// Validation
+const {
+    validateGetFilesPayload,
+} = require("../validation");
+
+
 // Response
 const {
     Success,
@@ -39,16 +45,21 @@ const {
 
 app.get("/", function(req, res)
 {
-    AppMicroservice.v1.get(_getAppDataFromQuery(req))
-    .then(function (result)
+    validateGetFilesPayload(req.query)
+    .then(function (_)
     {
-        const app = result.data.data[0];
-
-        CloudinaryController.get(_getCloudinaryDataFromQuery(req, app))
-        .then((result) => _sendCloudinaryGetSuccess(res, result))
-        .catch((err) => _sendCloudinaryGetError(res, err));
+        AppMicroservice.v1.get(_getAppDataFromQuery(req))
+        .then(function (result)
+        {
+            const app = result.data.data[0];
+    
+            CloudinaryController.get(_getCloudinaryDataFromQuery(req, app))
+            .then((result) => _sendCloudinaryGetSuccess(res, result))
+            .catch((err) => _sendCloudinaryGetError(res, err));
+        })
+        .catch((err) => _sendAppMicroserviceError(req, res, err));
     })
-    .catch((err) => _sendAppMicroserviceError(req, res, err));
+    .catch((err) => _sendQueryValidationError(res, err));
 });
 
 function _sendCloudinaryGetSuccess(res, result)
@@ -234,6 +245,15 @@ function _sendCloudinaryDeleteError(res, err)
 /***********
  * HELPERS *
  ***********/
+
+function _sendQueryValidationError(res, err)
+{
+    ValidationError.json({
+        res,
+        message: "Query Validation Error",
+        error: err,
+    });
+}
 
 function _sendAppMicroserviceError(req, res, err)
 {
