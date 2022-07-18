@@ -13,6 +13,10 @@ app.use(bodyParser.json());                         // support json encoded bodi
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 
+// Microservices
+const { AppMicroservice } = require("@beanc16/microservices-abstraction");
+
+
 // Controllers
 const { CloudinaryController } = require("../../../../js/controllers");
 
@@ -32,15 +36,42 @@ const {
  * GETS *
  ********/
 
-/*
 app.get("/", function(req, res)
 {
-    Success.json({
-        res,
-        message: "Pong",
+    CloudinaryController.get({ fileName: "oof_y38hyq" })
+    .then(function (result)
+    {
+        Success.json({
+            res,
+            message: "Successfully retrieved file from Cloudinary",
+            data: {
+                url: result.url,
+            },
+        });
+    })
+    .catch(function (err)
+    {
+        const { statusCode } = err;
+
+        if (statusCode === 404)
+        {
+            NotFound.json({
+                res,
+                message: "That file does not exist on Cloudinary",
+                error: err.toJson(),
+            });
+        }
+
+        else
+        {
+            InternalServerError.json({
+                res,
+                message: "Failed to retrieve file from Cloudinary",
+                error: err.toJson(),
+            });
+        }
     });
 });
-*/
 
 
 
@@ -57,7 +88,7 @@ app.post("/upload", function(req, res)
     {
         Success.json({
             res,
-            message: "Successfully saved image to Cloudinary",
+            message: "Successfully saved file to Cloudinary",
             data: {
                 url: result.url,
             },
@@ -67,7 +98,7 @@ app.post("/upload", function(req, res)
     {
         InternalServerError.json({
             res,
-            message: "Failed to save image to Cloudinary",
+            message: "Failed to save file to Cloudinary",
             error: err.toJson(),
         });
     });
@@ -89,7 +120,7 @@ app.patch("/rename", function(req, res)
     {
         Success.json({
             res,
-            message: "Successfully renamed image on Cloudinary",
+            message: "Successfully renamed file on Cloudinary",
             data: {
                 url: result.url,
             },
@@ -103,7 +134,7 @@ app.patch("/rename", function(req, res)
         {
             NotFound.json({
                 res,
-                message: "That image does not exist on Cloudinary",
+                message: "That file does not exist on Cloudinary",
                 error: err.toJson(),
             });
         }
@@ -112,7 +143,7 @@ app.patch("/rename", function(req, res)
         {
             InternalServerError.json({
                 res,
-                message: "Failed to rename image on Cloudinary",
+                message: "Failed to rename file on Cloudinary",
                 error: err.toJson(),
             });
         }
@@ -129,19 +160,19 @@ app.patch("/rename", function(req, res)
 
 app.delete("/delete", function(req, res)
 {
-    CloudinaryController.delete({ fileName: "bugcatStareRight" })
+    CloudinaryController.delete({ fileName: "oof_y38hyq" })
     .then(function (result)
     {
         Success.json({
             res,
-            message: "Successfully deleted image from Cloudinary",
+            message: "Successfully deleted file from Cloudinary",
         });
     })
     .catch(function (err)
     {
         InternalServerError.json({
             res,
-            message: "Failed to delete image from Cloudinary",
+            message: "Failed to delete file from Cloudinary",
             error: err.toJson(),
         });
     });
