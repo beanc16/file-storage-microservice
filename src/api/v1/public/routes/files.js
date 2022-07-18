@@ -106,27 +106,31 @@ app.post("/upload", function(req, res)
         const app = result.data.data[0];
 
         CloudinaryController.upload(_getCloudinaryDataFromBody(req, app))
-        .then(function (result)
-        {
-            Success.json({
-                res,
-                message: "Successfully saved file to Cloudinary",
-                data: {
-                    url: result.url,
-                },
-            });
-        })
-        .catch(function (err)
-        {
-            InternalServerError.json({
-                res,
-                message: "Failed to save file to Cloudinary",
-                error: err.toJson(),
-            });
-        });
+        .then((result) => _sendCloudinaryUploadSuccess(res, result))
+        .catch((err) => _sendCloudinaryUploadError(res, err));
     })
     .catch((err) => _sendAppMicroserviceError(req, res, err));
 });
+
+function _sendCloudinaryUploadSuccess(res, result)
+{
+    Success.json({
+        res,
+        message: "Successfully saved file to Cloudinary",
+        data: {
+            url: result.url,
+        },
+    });
+}
+
+function _sendCloudinaryUploadError(res, err)
+{
+    InternalServerError.json({
+        res,
+        message: "Failed to save file to Cloudinary",
+        error: err.toJson(),
+    });
+}
 
 
 
