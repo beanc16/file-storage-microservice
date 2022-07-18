@@ -1,7 +1,7 @@
-//const mySchemas = require("./mySchemas");
+const filesSchemas = require("./files");
 
 
 
 module.exports = {
-    //...accountSchemas,
+    ...filesSchemas,
 };
