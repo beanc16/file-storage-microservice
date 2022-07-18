@@ -18,7 +18,8 @@ class CloudinaryController
         appName = "file-storage-microservice",
         nestedFolders,
         fileName,
-        options = {},
+        options = {
+        },
     })
     {
         return new Promise((resolve, reject) =>
@@ -81,10 +82,14 @@ class CloudinaryController
 
     static async rename({
         appName = "file-storage-microservice",
-        oldNestedFolders,
-        oldFileName,
-        newNestedFolders,
-        newFileName,
+        old: {
+            nestedFolders: oldNestedFolders,
+            fileName: oldFileName,
+        },
+        new: {
+            nestedFolders: newNestedFolders,
+            fileName: newFileName,
+        },
         options = {
             invalidate: true,
         },
