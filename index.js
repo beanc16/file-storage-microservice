@@ -62,7 +62,8 @@ app.use(`/`, errorEndpoints);
  * PORT *
  ********/
 
-app.listen(serverInfo.port, async function ()
+app.listen(serverInfo.port, async function (err)
 {
+  if (err) logger.error("Error in server setup", err);
   logger.info(`App listening on port ${serverInfo.port}`);
 });
