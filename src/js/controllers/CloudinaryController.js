@@ -43,7 +43,11 @@ class CloudinaryController
     static async upload({
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
-        fileName,
+        file: {
+            dataUri,
+            fileName,
+            url,
+        } = {},
         options = {
             overwrite: false,
         },
@@ -53,28 +57,23 @@ class CloudinaryController
         {
             // Get file paths
             const {
-                localFilePath,
                 cloudinaryFilePath,
-            } = this._constructFilePaths(appId, nestedFolders, fileName);
-
-            if (!fs.existsSync(localFilePath))
-            {
-                reject(new FileDoesNotExistError(localFilePath));
-            }
+            } = this._constructFilePathsFromUrl(
+                appId,
+                nestedFolders,
+                fileName || url,
+                (fileName === undefined)
+            );
     
             // Upload file to cloudinary
-            cloudinary.uploader.upload(localFilePath, {
+            cloudinary.uploader.upload(url || dataUri, {
                 ...options,
                 "public_id": cloudinaryFilePath,
             })
             .then((result) => {
-                // Delete file locally
-                fs.unlinkSync(localFilePath);
                 resolve(result);
             })
             .catch((err) => {
-                // Delete file locally
-                fs.unlinkSync(localFilePath);
                 reject(new JsonError(err));
             });
         });
@@ -149,7 +148,7 @@ class CloudinaryController
      * HELPERS *
      ***********/
 
-    static _constructFilePaths(appId, nestedFolders, fileName)
+    static _constructFilePaths(appId, nestedFolders, fileName = "")
     {
         // Local path
         const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
@@ -162,6 +161,30 @@ class CloudinaryController
         
         return {
             localFilePath,
+            cloudinaryFilePath,
+        };
+    }
+
+    static _constructFilePathsFromUrl(appId, nestedFolders, fileInfo, isUrl)
+    {
+        let fileName = fileInfo;
+        
+        // fileInfo is a URL
+        if (isUrl)
+        {
+            const fileUrlWithoutExtension = (fileInfo.lastIndexOf(".") !== -1)
+                ? fileInfo.substring(0, fileInfo.lastIndexOf("."))
+                : fileInfo;
+
+            // Remove everything from the URL before the file name
+            fileName = (fileUrlWithoutExtension.lastIndexOf("/") !== -1)
+                ? fileUrlWithoutExtension.substring(fileInfo.lastIndexOf("/"))
+                : fileInfo;
+        }
+
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileName}`;
+        
+        return {
             cloudinaryFilePath,
         };
     }
