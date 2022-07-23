@@ -6,6 +6,7 @@
   "scripts": {
     "start-dev": "node index.js",
     "start": "nodemon index.js",
+    "start-test-server": "nodemon src/test/testServer.js",
     "heroku-prebuild": "node ./private-package-setup/writeNpmrcFile.js"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "dotenv": "^14.1.0",
     "dotnet-responses": "^1.7.0",
     "express": "^4.17.2",
+    "form-data": "^4.0.0",
     "joi": "^17.5.0",
     "mongodb": "^4.3.0",
     "mongodb-controller": "^0.2.1",
