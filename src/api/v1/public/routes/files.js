@@ -13,6 +13,10 @@ app.use(bodyParser.json());                         // support json encoded bodi
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 
+// Telemetry
+const { logger } = require("@beanc16/logger");
+
+
 // Microservices
 const { AppMicroservice } = require("@beanc16/microservices-abstraction");
 
@@ -91,9 +95,12 @@ function _sendCloudinaryGetError(res, err)
 
     else
     {
+        const errMsg = "Failed to retrieve file from Cloudinary";
+        logger.error(errMsg, err);
+
         InternalServerError.json({
             res,
-            message: "Failed to retrieve file from Cloudinary",
+            message: errMsg,
             error: err.toJson(),
         });
     }
@@ -139,9 +146,12 @@ function _sendCloudinaryUploadSuccess(res, result)
 
 function _sendCloudinaryUploadError(res, err)
 {
+    const errMsg = "Failed to save file to Cloudinary";
+    logger.error(errMsg, err);
+
     InternalServerError.json({
         res,
-        message: "Failed to save file to Cloudinary",
+        message: errMsg,
         error: err.toJson(),
     });
 }
@@ -200,9 +210,12 @@ function _sendCloudinaryRenameError(res, err)
 
     else
     {
+        const errMsg = "Failed to rename file on Cloudinary";
+        logger.error(errMsg, err);
+    
         InternalServerError.json({
             res,
-            message: "Failed to rename file on Cloudinary",
+            message: errMsg,
             error: err.toJson(),
         });
     }
@@ -250,9 +263,12 @@ function _sendCloudinaryDeleteSuccess(res, result)
 
 function _sendCloudinaryDeleteError(res, err)
 {
+    const errMsg = "Failed to delete file from Cloudinary";
+    logger.error(errMsg, err);
+
     InternalServerError.json({
         res,
-        message: "Failed to delete file from Cloudinary",
+        message: errMsg,
         error: err.toJson(),
     });
 }
@@ -304,9 +320,12 @@ function _sendAppMicroserviceError(req, res, err)
 
     else
     {
+        const errMsg = "An unknown error occurred while validating appId and appName";
+        logger.error(errMsg, err.response.data.error || err, req.query, err.response.data);
+
         InternalServerError.json({
             res,
-            message: "An unknown error occurred while validating appId and appName",
+            message: errMsg,
             data: req.query,
             error: err.response.data.error || err,
         });
