@@ -1,11 +1,11 @@
 const appSchemas = require("./app");
-const fileNameSchemas = require("./fileName");
+const fileSchemas = require("./file");
 const nestedFoldersSchemas = require("./nestedFolders");
 
 
 
 module.exports = {
     ...appSchemas,
-    ...fileNameSchemas,
+    ...fileSchemas,
     ...nestedFoldersSchemas,
 };
