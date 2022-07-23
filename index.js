@@ -21,6 +21,10 @@ const cors = require("cors");
 app.use(cors());
 
 
+// Telemetry
+const { logger } = require("@beanc16/logger");
+
+
 // Swagger
 /*
 // TODO: Add swagger docs
@@ -60,5 +64,5 @@ app.use(`/`, errorEndpoints);
 
 app.listen(serverInfo.port, async function ()
 {
-  console.info("App listening on port " + serverInfo.port);
+  logger.info(`App listening on port ${serverInfo.port}`);
 });
