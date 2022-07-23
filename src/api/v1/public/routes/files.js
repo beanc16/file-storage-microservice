@@ -9,8 +9,8 @@ const app = express();
 
 // Access req.body in post requests
 const bodyParser = require("body-parser");
-app.use(bodyParser.json());                         // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.json());                         // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/xwww-form-urlencoded
 
 
 // Telemetry
