@@ -22,7 +22,13 @@ app.use(cors());
 
 
 // Telemetry
-const { logger } = require("@beanc16/logger");
+const {
+  logger,
+  express: {
+    errorHandler,
+    logEndpointDuration,
+  },
+} = require("@beanc16/logger");
 
 
 // Swagger
@@ -42,6 +48,16 @@ const apiPrefix = "api";
 
 
 
+/********************
+ * START MIDDLEWARE *
+ ********************/
+
+app.use((req, res, next) => logEndpointDuration(req, res, next));
+
+
+
+
+
 /*******************
  * EXTERNAL ROUTES *
  *******************/
@@ -53,6 +69,16 @@ app.use(`/${apiPrefix}`, apiEndpoints);
 // Errors
 const errorEndpoints = require("./src/apiErrors");
 app.use(`/`, errorEndpoints);
+
+
+
+
+
+/******************
+ * END MIDDLEWARE *
+ ******************/
+
+app.use((err, req, res, next) => errorHandler(err, req, res, next));
 
 
 
