@@ -13,12 +13,14 @@ app.use(cors());
 
 
 // Response
-const { Success } = require("dotnet-responses");
+const {
+    Success,
+    InternalServerError,
+} = require("dotnet-responses");
 
 
 // Sending images
 const axios = require("axios");
-const FormData = require("form-data");
 
 
 
@@ -44,12 +46,36 @@ app.get("/ping", function(req, res)
  * POSTS *
  *********/
 
-app.post("/upload-url", function(req, res)
+app.post("/upload", function(req, res)
 {
-    //axios.post
-    Success.json({
-        res,
-        message: "Pong",
+    const data = {
+        app: {
+            id: "62cb9241e5a1b7985677ebfe",
+            searchName: "file-storage-microservice"
+        },
+        file: {
+            dataUri: require("image-to-uri")("uploads/capoo-bugcat.gif"),
+            fileName: "capoo-bugcat",
+            //fileName: "bugcatStareRight",
+            //url: "https://cdn.discordapp.com/emojis/927237004469628988.png",
+        },
+    };
+
+    axios.post("http://localhost:8002/api/v1/files/upload", data)
+    .then(function (response)
+    {
+        Success.json({
+            res,
+            data: response.data.data,
+            message: response.data.message,
+        });
+    })
+    .catch(function (err)
+    {
+        InternalServerError.json({
+            res,
+            ...err.response.data,
+        });
     });
 });
 
