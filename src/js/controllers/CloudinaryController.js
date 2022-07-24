@@ -116,7 +116,7 @@ class CloudinaryController
     }
 
     static async delete({
-        appName = "file-storage-microservice",
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
         fileName,
         options = {
@@ -129,7 +129,7 @@ class CloudinaryController
             // Get file paths
             const {
                 cloudinaryFilePath,
-            } = this._constructFilePaths(appName, nestedFolders, fileName);
+            } = this._constructFilePaths(appId, nestedFolders, fileName);
     
             // Upload file to cloudinary
             cloudinary.uploader.destroy(cloudinaryFilePath, options)
