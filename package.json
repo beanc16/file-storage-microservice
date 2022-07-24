@@ -7,7 +7,7 @@
     "start-dev": "node index.js",
     "start": "nodemon index.js",
     "start-test-server": "nodemon src/test/testServer.js",
-    "heroku-prebuild": "node -r dotenv/config ./private-package-setup/writeNpmrcFile.js"
+    "heroku-prebuild": "node -r dotenv ./private-package-setup/writeNpmrcFile.js"
   },
   "dependencies": {
     "@beanc16/joi-helpers": "^0.2.3",
