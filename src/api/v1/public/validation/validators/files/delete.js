@@ -1,14 +1,13 @@
-//const { mySchema } = require("../schemas");
+const { deleteFilesSchema } = require("../../schemas");
 const { validateJoiSchema } = require("@beanc16/joi-helpers");
 
 
 
-// LabelHere
-function validateMyPayload(payload)
+function validateDeleteFilesPayload(payload)
 {
     return new Promise(function (resolve, reject)
     {
-        validateJoiSchema(mySchema, payload)
+        validateJoiSchema(deleteFilesSchema, payload)
             .then(function (value)
             {
                 resolve(value);
@@ -23,5 +22,5 @@ function validateMyPayload(payload)
 
 
 module.exports = {
-    //validateMyPayload,
+    validateDeleteFilesPayload,
 };

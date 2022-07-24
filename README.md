@@ -1,11 +1,12 @@
-# template-microservice-api
+# file-storage-microservice
 
-A node server template for microservices to be hosted on Heroku.
+A microservice for storing files in the Cloud.
 
 <!--
 API Documentation:
-[//]: # https://template-microservice-api.herokuapp.com/api-docs
+[//]: # https://file-storage-microservice-api.herokuapp.com/api-docs
 -->
 
-Back-End Code (Node.js & MongoDb):
-https://github.com/beanc16/template-microservice
+Back-End Code (Node.js & Cloudinary):
+https://github.com/beanc16/file-storage-microservice
+

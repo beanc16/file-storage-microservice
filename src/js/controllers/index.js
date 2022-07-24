@@ -1,7 +1,7 @@
-//const MyController = require("./MyController");
+const CloudinaryController = require("./CloudinaryController");
 
 
 
 module.exports = {
-    //MyController,
+    CloudinaryController,
 };

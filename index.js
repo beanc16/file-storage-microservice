@@ -21,6 +21,16 @@ const cors = require("cors");
 app.use(cors());
 
 
+// Telemetry
+const {
+  logger,
+  express: {
+    errorHandler,
+    logEndpointDuration,
+  },
+} = require("@beanc16/logger");
+
+
 // Swagger
 /*
 // TODO: Add swagger docs
@@ -33,6 +43,16 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(docs));
 
 // Custom variables
 const apiPrefix = "api";
+
+
+
+
+
+/********************
+ * START MIDDLEWARE *
+ ********************/
+
+app.use((req, res, next) => logEndpointDuration(req, res, next));
 
 
 
@@ -54,11 +74,22 @@ app.use(`/`, errorEndpoints);
 
 
 
+/******************
+ * END MIDDLEWARE *
+ ******************/
+
+app.use((err, req, res, next) => errorHandler(err, req, res, next));
+
+
+
+
+
 /********
  * PORT *
  ********/
 
-app.listen(serverInfo.port, async function ()
+app.listen(serverInfo.port, async function (err)
 {
-  console.info("App listening on port " + serverInfo.port);
+  if (err) logger.error("Error in server setup", err);
+  logger.info(`App listening on port ${serverInfo.port}`);
 });

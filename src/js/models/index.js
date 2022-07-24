@@ -1,7 +1,7 @@
-//const myModel = require("./myModel");
+const ErrorResponse = require("./ErrorResponse");
 
 
 
 module.exports = {
-    //myModel,
+    ErrorResponse,
 };
