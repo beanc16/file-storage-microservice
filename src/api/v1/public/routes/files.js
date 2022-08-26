@@ -53,7 +53,7 @@ const {
 app.get("/", function(req, res)
 {
     validateGetFilesPayload(req.query)
-    .then(function (_)
+    .then(function (/*_*/)
     {
         AppMicroservice.v1.get(_getAppDataFromQuery(req))
         .then(function (result)
@@ -117,7 +117,7 @@ function _sendCloudinaryGetError(res, err)
 app.post("/upload", function(req, res)
 {
     validateUploadFilesPayload(req.body)
-    .then(function (_)
+    .then(function (/*_*/)
     {
         AppMicroservice.v1.get(req.body.app)
         .then(function (result)
@@ -168,7 +168,7 @@ app.patch("/rename", function(req, res)
 {
 
     validateRenameFilesPayload(req.body)
-    .then(function (_)
+    .then(function (/*_*/)
     {
         AppMicroservice.v1.get(req.body.app)
         .then(function (result)
@@ -232,7 +232,7 @@ function _sendCloudinaryRenameError(res, err)
 app.delete("/delete", function(req, res)
 {
     validateDeleteFilesPayload(req.body)
-    .then(function (_)
+    .then(function (/*_*/)
     {
         AppMicroservice.v1.get(req.body.app)
         .then(function (result)
@@ -240,7 +240,7 @@ app.delete("/delete", function(req, res)
             const app = result.data.data[0];
     
             CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
-            .then(function (getResult)
+            .then(function (/*getResult*/)
             {
                 CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
                 .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
@@ -253,7 +253,7 @@ app.delete("/delete", function(req, res)
     .catch((err) => _sendPayloadValidationError(res, err));
 });
 
-function _sendCloudinaryDeleteSuccess(res, result)
+function _sendCloudinaryDeleteSuccess(res/*, result*/)
 {
     Success.json({
         res,

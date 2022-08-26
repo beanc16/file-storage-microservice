@@ -4,11 +4,10 @@ const cloudinary = require("cloudinary").v2;
 cloudinary.config(cloudinaryConfigEnum);
 
 // Files
-const fs = require("fs");
 const appRoot = require("app-root-path");
 
 // Models
-const { FileDoesNotExistError, JsonError } = require("../errors");
+const { JsonError } = require("../errors");
 
 
 

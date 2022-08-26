@@ -1,4 +1,3 @@
-const Joi = require("joi");
 const { JoiRequired } = require("@beanc16/joi-helpers");
 const fileSchemas = require("./helpers");
 
