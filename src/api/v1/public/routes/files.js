@@ -123,9 +123,38 @@ app.post("/upload", function(req, res)
         .then(function (result)
         {
             const app = result.data.data[0];
+            const cloudinaryData = _getCloudinaryDataFromBody(req, app);
 
-            CloudinaryController.upload(_getCloudinaryDataFromBody(req, app))
-            .then((result) => _sendCloudinaryUploadSuccess(res, result))
+            CloudinaryController.upload(cloudinaryData)
+            .then((result) => {
+                const {
+                    body: {
+                        imageOptions,
+                    },
+                } = req;
+
+                if (!imageOptions)
+                {
+                    return _sendCloudinaryUploadSuccess(res, result);
+                }
+                
+                const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+
+                CloudinaryController.doImageOperation({
+                    ...cloudinaryData,
+                    file: {
+                        ...cloudinaryData.file,
+                        fileExtension,
+                    },
+                    options: imageOptions,
+                })
+                .then((upscaledUrl) => {
+                    return _sendCloudinaryUploadSuccess(res, {
+                        url: upscaledUrl,
+                    });
+                })
+                .catch((err) => _sendCloudinaryUploadError(res, err));
+            })
             .catch((err) => _sendCloudinaryUploadError(res, err));
         })
         .catch((err) => _sendAppMicroserviceError(req, res, err));

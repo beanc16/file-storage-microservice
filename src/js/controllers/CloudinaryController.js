@@ -78,6 +78,36 @@ class CloudinaryController
         });
     }
 
+    static async doImageOperation({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        file: {
+            fileName = '',
+            fileExtension = '',
+        } = {},
+        options = {
+            effect: 'upscale',
+        },
+    })
+    {
+        return new Promise((resolve, reject) =>
+        {
+            try {
+                // Get file paths
+                const {
+                    cloudinaryFilePath,
+                } = this._constructFilePaths(appId, nestedFolders, fileName, fileExtension);
+
+                // Do image effect
+                const htmlImg = cloudinary.image(cloudinaryFilePath, options);
+                const upscaledImageUrl = this._getSrcFromHtmlImgTag(htmlImg);
+                resolve(upscaledImageUrl);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     static async rename({
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         old: {
@@ -147,7 +177,19 @@ class CloudinaryController
      * HELPERS *
      ***********/
 
-    static _constructFilePaths(appId, nestedFolders, fileName = "")
+    static getExtensionFromUrl(url, includeDotBeforeExtension = true)
+    {
+        let indexOfExtension = url.lastIndexOf('.');
+
+        if (!includeDotBeforeExtension)
+        {
+            indexOfExtension += 1;
+        }
+
+        return url.substring(indexOfExtension);
+    }
+
+    static _constructFilePaths(appId, nestedFolders, fileName = "", fileExtension = "")
     {
         // Local path
         const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
@@ -156,7 +198,7 @@ class CloudinaryController
         const fileNameWithoutExtension = (fileName.lastIndexOf(".") !== -1)
             ? fileName.substring(0, fileName.lastIndexOf("."))
             : fileName;
-        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}`;
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}${fileExtension}`;
         
         return {
             localFilePath,
@@ -186,6 +228,12 @@ class CloudinaryController
         return {
             cloudinaryFilePath,
         };
+    }
+
+    static _getSrcFromHtmlImgTag(htmlImgTag)
+    {
+        const regex = /(<img.+src=["'])(.*)(["'].+>)/ig;
+        return htmlImgTag.replace(regex, '$2');
     }
 }
 
