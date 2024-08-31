@@ -10,12 +10,14 @@ const getFilesSchema = JoiRequired.alternatives().try(
         appName: Joi.string(),
         fileName: fileSchemas.fileNameRequired,
         nestedFolders: fileSchemas.nestedFolders,
+        imageOptions: fileSchemas.imageOptions,
     }),
     JoiRequired.object({
         appId: Joi.string(),
         appName: JoiRequired.string(),
         fileName: fileSchemas.fileNameRequired,
         nestedFolders: fileSchemas.nestedFolders,
+        imageOptions: fileSchemas.imageOptions,
     }),
 );
 
