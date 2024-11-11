@@ -343,7 +343,7 @@ function _sendCloudinaryDeleteBulkSuccess(req, res/*, result*/)
 {
     Success.json({
         res,
-        message: `Successfully deleted files older than ${req.body.olderThanInDays} days old from Cloudinary`,
+        message: `Successfully deleted files older than ${req.body.olderThanInDays ?? 7} days old from Cloudinary`,
     });
 }
 
