@@ -6,6 +6,9 @@ cloudinary.config(cloudinaryConfigEnum);
 // Files
 const appRoot = require("app-root-path");
 
+// Time
+const dayjs = require("dayjs");
+
 // Models
 const { JsonError } = require("../errors");
 
@@ -164,6 +167,61 @@ class CloudinaryController
             cloudinary.uploader.destroy(cloudinaryFilePath, options)
             .then((result) => {
                 resolve(result);
+            })
+            .catch((err) => {
+                reject(new JsonError(err));
+            });
+        });
+    }
+
+    static async deleteBulk({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        olderThanInDays = 7,
+    })
+    {
+        return new Promise((resolve, reject) =>
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this._constructFilePaths(appId, nestedFolders);
+
+            cloudinary.api.resources({
+                prefix: cloudinaryFilePath,
+                max_results: 500,
+                type: 'upload',
+            })
+            .then(({ resources = [] }) => {
+                const resourcesToDelete = resources.reduce((acc, { created_at, public_id }) => {
+                    // Get the number of days passed since the resource was created
+                    const daysPassed = dayjs().diff(
+                        dayjs(created_at),
+                        'days',
+                        true
+                    );
+
+                    // Include the resource for deletion if enough time has passed
+                    if (daysPassed >= olderThanInDays)
+                    {
+                        acc.push(public_id);
+                    }
+
+                    return acc;
+                }, []);
+
+                if (resourcesToDelete.length === 0)
+                {
+                    resolve({});
+                }
+
+                cloudinary.api.delete_resources(resourcesToDelete)
+                .then((result) => {
+                    resolve(result);
+                })
+                .catch((err) => {
+                    reject(new JsonError(err));
+                });
             })
             .catch((err) => {
                 reject(new JsonError(err));
