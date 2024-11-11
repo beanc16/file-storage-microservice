@@ -31,6 +31,7 @@ const {
     validateUploadFilesPayload,
     validateRenameFilesPayload,
     validateDeleteFilesPayload,
+    validateDeleteBulkPayload,
 } = require("../validation");
 
 
@@ -311,11 +312,38 @@ app.delete("/delete", function(req, res)
     .catch((err) => _sendPayloadValidationError(res, err));
 });
 
+app.delete("/delete-bulk", function(req, res)
+{
+    validateDeleteBulkPayload(req.body)
+    .then(function (/*_*/)
+    {
+        AppMicroservice.v1.get(req.body.app)
+        .then(function (result)
+        {
+            const app = result.data.data[0];
+    
+            CloudinaryController.deleteBulk(_getCloudinaryDataFromBody(req, app))
+            .then ((deleteResult) => _sendCloudinaryDeleteBulkSuccess(req, res, deleteResult))
+            .catch((err) => _sendCloudinaryDeleteError(res, err));
+        })
+        .catch((err) => _sendAppMicroserviceError(req, res, err));
+    })
+    .catch((err) => _sendPayloadValidationError(res, err));
+});
+
 function _sendCloudinaryDeleteSuccess(res/*, result*/)
 {
     Success.json({
         res,
         message: "Successfully deleted file from Cloudinary",
+    });
+}
+
+function _sendCloudinaryDeleteBulkSuccess(req, res/*, result*/)
+{
+    Success.json({
+        res,
+        message: `Successfully deleted files older than ${req.body.olderThanInDays} days old from Cloudinary`,
     });
 }
 
