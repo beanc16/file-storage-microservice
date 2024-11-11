@@ -212,12 +212,15 @@ class CloudinaryController
 
                 if (resourcesToDelete.length === 0)
                 {
-                    resolve({});
+                    resolve({ numOfFilesDeleted: 0 });
                 }
 
                 cloudinary.api.delete_resources(resourcesToDelete)
                 .then((result) => {
-                    resolve(result);
+                    resolve({
+                        ...result,
+                        numOfFilesDeleted: resourcesToDelete.length,
+                    });
                 })
                 .catch((err) => {
                     reject(new JsonError(err));
