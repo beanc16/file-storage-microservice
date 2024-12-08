@@ -193,7 +193,7 @@ class CloudinaryController
                 type: 'upload',
             })
             .then(({ resources = [] }) => {
-                const resourcesToDelete = resources.reduce((acc, { created_at, public_id }) => {
+                const { chunkedResourcesToDelete } = resources.reduce((acc, { created_at, public_id }) => {
                     // Get the number of days passed since the resource was created
                     const daysPassed = dayjs().diff(
                         dayjs(created_at),
@@ -204,23 +204,48 @@ class CloudinaryController
                     // Include the resource for deletion if enough time has passed
                     if (daysPassed >= olderThanInDays)
                     {
-                        acc.push(public_id);
+                        acc.chunkedResourcesToDelete[acc.curChunk].push(public_id);
+                    }
+
+                    // Cloudinary can only delete 100 resources at a time.
+                    // Thus, chunk the resources to delete into groups of 100.
+                    if (acc.chunkedResourcesToDelete[acc.curChunk].length >= 100)
+                    {
+                        acc.curChunk += 1;
+                        acc.chunkedResourcesToDelete.push([]);
                     }
 
                     return acc;
-                }, []);
+                }, {
+                    chunkedResourcesToDelete: [[]],
+                    curChunk: 0,
+                });
 
-                if (resourcesToDelete.length === 0)
+                // Exit early if there are no resources to delete
+                if (
+                    chunkedResourcesToDelete.length === 1
+                    && chunkedResourcesToDelete[0].length === 0
+                )
                 {
                     resolve({ numOfFilesDeleted: 0 });
                 }
 
-                cloudinary.api.delete_resources(resourcesToDelete)
-                .then((result) => {
-                    resolve({
-                        ...result,
-                        numOfFilesDeleted: resourcesToDelete.length,
-                    });
+                // Delete all resources
+                const deletePromises = chunkedResourcesToDelete.map(async (resourcesToDelete) => {
+                    await cloudinary.api.delete_resources(resourcesToDelete);
+                });
+
+                Promise.all(deletePromises)
+                .then((results) => {
+                    const output = results.reduce((acc, result) => {
+                        return {
+                            ...acc,
+                            ...result,
+                            numOfFilesDeleted: acc.numOfFilesDeleted + result.numOfFilesDeleted,
+                        };
+                    }, { numOfFilesDeleted: 0 });
+
+                    resolve(output);
                 })
                 .catch((err) => {
                     reject(new JsonError(err));
