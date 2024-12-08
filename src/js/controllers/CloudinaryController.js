@@ -241,9 +241,8 @@ class CloudinaryController
                         return {
                             ...acc,
                             ...result,
-                            numOfFilesDeleted: acc.numOfFilesDeleted + result.numOfFilesDeleted,
                         };
-                    }, { numOfFilesDeleted: 0 });
+                    }, { numOfFilesDeleted: resources.length });
 
                     resolve(output);
                 })
