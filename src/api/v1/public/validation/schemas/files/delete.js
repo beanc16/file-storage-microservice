@@ -4,6 +4,7 @@ const fileSchemas = require('./helpers/index.js');
 
 const deleteFilesSchema = JoiRequired.object({
     app: fileSchemas.appRequired,
+    fileName: fileSchemas.fileNameRequired,
     nestedFolders: fileSchemas.nestedFolders,
 });
 
