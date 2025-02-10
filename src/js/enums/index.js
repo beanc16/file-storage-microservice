@@ -1,13 +1,7 @@
-const cloudinaryConfigEnum = require("./cloudinaryConfigEnum");
-const collectionsEnum = require("./collectionsEnum");
-const serverInfoEnum = require("./serverInfoEnum");
-const sortOptionsEnum = require("./sortOptionsEnum");
-
-
+const cloudinaryConfigEnum = require('./cloudinaryConfigEnum.js');
+const serverInfoEnum = require('./serverInfoEnum.js');
 
 module.exports = {
     cloudinaryConfigEnum,
-    collectionsEnum,
     serverInfoEnum,
-    sortOptionsEnum,
 };

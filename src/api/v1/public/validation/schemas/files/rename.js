@@ -1,7 +1,5 @@
-const { JoiRequired } = require("@beanc16/joi-helpers");
-const fileSchemas = require("./helpers");
-
-
+const { JoiRequired } = require('@beanc16/joi-helpers');
+const fileSchemas = require('./helpers/index.js');
 
 const renameFilesSchema = JoiRequired.object({
     app: fileSchemas.appRequired,
@@ -14,8 +12,6 @@ const renameFilesSchema = JoiRequired.object({
         nestedFolders: fileSchemas.nestedFolders,
     }),
 });
-
-
 
 module.exports = {
     renameFilesSchema,

@@ -1,9 +1,7 @@
-const getSchemas = require("./get");
-const uploadSchemas = require("./upload");
-const renameSchemas = require("./rename");
-const deleteSchemas = require("./delete");
-
-
+const getSchemas = require('./get.js');
+const uploadSchemas = require('./upload.js');
+const renameSchemas = require('./rename.js');
+const deleteSchemas = require('./delete.js');
 
 module.exports = {
     ...getSchemas,

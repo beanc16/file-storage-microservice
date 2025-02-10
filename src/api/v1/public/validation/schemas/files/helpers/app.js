@@ -1,7 +1,5 @@
-const Joi = require("joi");
-const { JoiRequired } = require("@beanc16/joi-helpers");
-
-
+const Joi = require('joi');
+const { JoiRequired } = require('@beanc16/joi-helpers');
 
 const app = Joi.alternatives().try(
     JoiRequired.object({
@@ -14,8 +12,6 @@ const app = Joi.alternatives().try(
     }),
 );
 const appRequired = app.required();
-
-
 
 module.exports = {
     app,

@@ -1,8 +1,9 @@
 class JsonError extends Error
 {
-    constructor(err) {
+    constructor(err)
+    {
         super(err.message || err.error.message);
-        this.name = "JsonError";
+        this.name = 'JsonError';
 
         if (err.http_code)
         {
@@ -34,7 +35,5 @@ class JsonError extends Error
         return result;
     }
 }
-
-
 
 module.exports = JsonError;

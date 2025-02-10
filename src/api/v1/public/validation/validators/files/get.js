@@ -1,25 +1,21 @@
-const { getFilesSchema } = require("../../schemas");
-const { validateJoiSchema } = require("@beanc16/joi-helpers");
-
-
+const { validateJoiSchema } = require('@beanc16/joi-helpers');
+const { getFilesSchema } = require('../../schemas/index.js');
 
 function validateGetFilesPayload(payload)
 {
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
         validateJoiSchema(getFilesSchema, payload)
-            .then(function (value)
+            .then((value) =>
             {
                 resolve(value);
             })
-            .catch(function (error)
+            .catch((error) =>
             {
                 reject(error);
             });
     });
 }
-
-
 
 module.exports = {
     validateGetFilesPayload,

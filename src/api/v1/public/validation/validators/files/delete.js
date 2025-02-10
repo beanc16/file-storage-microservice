@@ -1,18 +1,16 @@
-const { validateJoiSchema } = require("@beanc16/joi-helpers");
-const { deleteFilesSchema, deleteBulkSchema } = require("../../schemas");
-
-
+const { validateJoiSchema } = require('@beanc16/joi-helpers');
+const { deleteFilesSchema, deleteBulkSchema } = require('../../schemas/index.js');
 
 function validateDeleteFilesPayload(payload)
 {
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
         validateJoiSchema(deleteFilesSchema, payload)
-            .then(function (value)
+            .then((value) =>
             {
                 resolve(value);
             })
-            .catch(function (error)
+            .catch((error) =>
             {
                 reject(error);
             });
@@ -21,21 +19,19 @@ function validateDeleteFilesPayload(payload)
 
 function validateDeleteBulkPayload(payload)
 {
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
         validateJoiSchema(deleteBulkSchema, payload)
-            .then(function (value)
+            .then((value) =>
             {
                 resolve(value);
             })
-            .catch(function (error)
+            .catch((error) =>
             {
                 reject(error);
             });
     });
 }
-
-
 
 module.exports = {
     validateDeleteFilesPayload,

@@ -1,6 +1,4 @@
-const Joi = require("joi");
-
-
+const Joi = require('joi');
 
 const cloudinaryBackground = Joi.alternatives().try(
     Joi.string().valid(
@@ -24,9 +22,9 @@ const cloudinaryBackground = Joi.alternatives().try(
         'purple',
         'chocolate',
         'transparent',
-        'none'
+        'none',
     ),
-    Joi.string().regex(/^#[A-Fa-f0-9]{6}$/)
+    Joi.string().regex(/^#[A-Fa-f0-9]{6}$/),
 );
 
 const imageOptions = Joi.object({
@@ -34,8 +32,6 @@ const imageOptions = Joi.object({
     effect: Joi.string().valid('upscale'),
 });
 const imageOptionsRequired = imageOptions.required();
-
-
 
 module.exports = {
     imageOptions,

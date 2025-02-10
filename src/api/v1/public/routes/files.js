@@ -1,29 +1,32 @@
-/************
+/** **********
  * REQUIRES *
- ************/
+ *********** */
 
 // Routing
-const express = require("express");
+const express = require('express');
+
 const app = express();
 
-
 // Access req.body in post requests
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
+
 app.use(bodyParser.json());                         // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/xwww-form-urlencoded
 
-
 // Telemetry
-const { logger } = require("@beanc16/logger");
-
+const { logger } = require('@beanc16/logger');
 
 // Microservices
-const { AppMicroservice } = require("@beanc16/microservices-abstraction");
-
+const { AppMicroservice } = require('@beanc16/microservices-abstraction');
 
 // Controllers
-const { CloudinaryController } = require("../../../../js/controllers");
-
+const {
+    Success,
+    NotFound,
+    ValidationError,
+    InternalServerError,
+} = require('dotnet-responses');
+const { CloudinaryController } = require('../../../../js/controllers/index.js');
 
 // Validation
 const {
@@ -32,78 +35,66 @@ const {
     validateRenameFilesPayload,
     validateDeleteFilesPayload,
     validateDeleteBulkPayload,
-} = require("../validation");
-
+} = require('../validation/index.js');
 
 // Response
-const {
-    Success,
-    NotFound,
-    ValidationError,
-    InternalServerError,
-} = require("dotnet-responses");
 
-
-
-
-
-/********
+/** ******
  * GETS *
- ********/
+ ******* */
 
-app.get("/", function(req, res)
+app.get('/', (req, res) =>
 {
     validateGetFilesPayload(req.query)
-    .then(function (/*_*/)
-    {
-        AppMicroservice.v1.get(_getAppDataFromQuery(req))
-        .then(function (result)
+        .then((/* _ */) =>
         {
-            const app = result.data.data[0];
-            const cloudinaryData = _getCloudinaryDataFromQuery(req, app);
-
-            CloudinaryController.get(cloudinaryData)
-            .then((result) => {
-                const {
-                    query: {
-                        imageOptions,
-                    },
-                } = req;
-
-                if (!imageOptions)
+            AppMicroservice.v1.get(_getAppDataFromQuery(req))
+                .then((result) =>
                 {
-                    return _sendCloudinaryGetSuccess(res, result);
-                }
+                    const app = result.data.data[0];
+                    const cloudinaryData = _getCloudinaryDataFromQuery(req, app);
 
-                const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+                    CloudinaryController.get(cloudinaryData)
+                        .then((result) =>
+                        {
+                            const {
+                                query: {
+                                    imageOptions,
+                                },
+                            } = req;
 
-                CloudinaryController.doImageOperation({
-                    ...cloudinaryData,
-                    file: {
-                        fileName: cloudinaryData.fileName,
-                        fileExtension,
-                    },
-                    options: imageOptions,
+                            if (!imageOptions)
+                            {
+                                return _sendCloudinaryGetSuccess(res, result);
+                            }
+
+                            const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+
+                            CloudinaryController.doImageOperation({
+                                ...cloudinaryData,
+                                file: {
+                                    fileName: cloudinaryData.fileName,
+                                    fileExtension,
+                                },
+                                options: imageOptions,
+                            })
+                                .then((upscaledUrl) => _sendCloudinaryGetSuccess(res, {
+                                    url: upscaledUrl,
+                                }))
+                                .catch((err) => _sendCloudinaryGetError(res, err));
+                        })
+                        .catch((err) => _sendCloudinaryGetError(res, err));
                 })
-                .then((upscaledUrl) => {
-                    return _sendCloudinaryGetSuccess(res, {
-                        url: upscaledUrl,
-                    });
-                })
-                .catch((err) => _sendCloudinaryGetError(res, err));
-            })
-            .catch((err) => _sendCloudinaryGetError(res, err));
+                .catch((err) => _sendAppMicroserviceError(req, res, err));
         })
-        .catch((err) => _sendAppMicroserviceError(req, res, err));
-    })
-    .catch((err) => _sendQueryValidationError(res, err));
+        .catch((err) => _sendQueryValidationError(res, err));
 });
 
 function _sendCloudinaryGetSuccess(res, result)
 {
     Success.json({
         res,
-        message: "Successfully retrieved file from Cloudinary",
+        message: 'Successfully retrieved file from Cloudinary',
         data: {
             url: result.url,
         },
@@ -118,14 +109,14 @@ function _sendCloudinaryGetError(res, err)
     {
         NotFound.json({
             res,
-            message: "That file does not exist on Cloudinary",
+            message: 'That file does not exist on Cloudinary',
             error: err.toJson(),
         });
     }
 
     else
     {
-        const errMsg = "Failed to retrieve file from Cloudinary";
+        const errMsg = 'Failed to retrieve file from Cloudinary';
         logger.error(errMsg, err);
 
         InternalServerError.json({
@@ -136,67 +127,62 @@ function _sendCloudinaryGetError(res, err)
     }
 }
 
-
-
-
-
-/*********
+/** *******
  * POSTS *
- *********/
+ ******** */
 
-app.post("/upload", function(req, res)
+app.post('/upload', (req, res) =>
 {
     validateUploadFilesPayload(req.body)
-    .then(function (/*_*/)
-    {
-        AppMicroservice.v1.get(req.body.app)
-        .then(function (result)
+        .then((/* _ */) =>
         {
-            const app = result.data.data[0];
-            const cloudinaryData = _getCloudinaryDataFromBody(req, app);
-
-            CloudinaryController.upload(cloudinaryData)
-            .then((result) => {
-                const {
-                    body: {
-                        imageOptions,
-                    },
-                } = req;
-
-                if (!imageOptions)
+            AppMicroservice.v1.get(req.body.app)
+                .then((result) =>
                 {
-                    return _sendCloudinaryUploadSuccess(res, result);
-                }
+                    const app = result.data.data[0];
+                    const cloudinaryData = _getCloudinaryDataFromBody(req, app);
 
-                const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+                    CloudinaryController.upload(cloudinaryData)
+                        .then((result) =>
+                        {
+                            const {
+                                body: {
+                                    imageOptions,
+                                },
+                            } = req;
 
-                CloudinaryController.doImageOperation({
-                    ...cloudinaryData,
-                    file: {
-                        ...cloudinaryData.file,
-                        fileExtension,
-                    },
-                    options: imageOptions,
+                            if (!imageOptions)
+                            {
+                                return _sendCloudinaryUploadSuccess(res, result);
+                            }
+
+                            const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+
+                            CloudinaryController.doImageOperation({
+                                ...cloudinaryData,
+                                file: {
+                                    ...cloudinaryData.file,
+                                    fileExtension,
+                                },
+                                options: imageOptions,
+                            })
+                                .then((upscaledUrl) => _sendCloudinaryUploadSuccess(res, {
+                                    url: upscaledUrl,
+                                }))
+                                .catch((err) => _sendCloudinaryUploadError(res, err));
+                        })
+                        .catch((err) => _sendCloudinaryUploadError(res, err));
                 })
-                .then((upscaledUrl) => {
-                    return _sendCloudinaryUploadSuccess(res, {
-                        url: upscaledUrl,
-                    });
-                })
-                .catch((err) => _sendCloudinaryUploadError(res, err));
-            })
-            .catch((err) => _sendCloudinaryUploadError(res, err));
+                .catch((err) => _sendAppMicroserviceError(req, res, err));
         })
-        .catch((err) => _sendAppMicroserviceError(req, res, err));
-    })
-    .catch((err) => _sendPayloadValidationError(res, err));
+        .catch((err) => _sendPayloadValidationError(res, err));
 });
 
 function _sendCloudinaryUploadSuccess(res, result)
 {
     Success.json({
         res,
-        message: "Successfully saved file to Cloudinary",
+        message: 'Successfully saved file to Cloudinary',
         data: {
             url: result.url,
         },
@@ -205,7 +191,7 @@ function _sendCloudinaryUploadSuccess(res, result)
 
 function _sendCloudinaryUploadError(res, err)
 {
-    const errMsg = "Failed to save file to Cloudinary";
+    const errMsg = 'Failed to save file to Cloudinary';
     logger.error(errMsg, err);
 
     InternalServerError.json({
@@ -215,39 +201,34 @@ function _sendCloudinaryUploadError(res, err)
     });
 }
 
-
-
-
-
-/***********
+/** *********
  * PATCHES *
- ***********/
+ ********** */
 
-app.patch("/rename", function(req, res)
+app.patch('/rename', (req, res) =>
 {
-
     validateRenameFilesPayload(req.body)
-    .then(function (/*_*/)
-    {
-        AppMicroservice.v1.get(req.body.app)
-        .then(function (result)
+        .then((/* _ */) =>
         {
-            const app = result.data.data[0];
+            AppMicroservice.v1.get(req.body.app)
+                .then((result) =>
+                {
+                    const app = result.data.data[0];
     
-            CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
-            .then((result) => _sendCloudinaryRenameSuccess(res, result))
-            .catch((err) => _sendCloudinaryRenameError(res, err));
+                    CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
+                        .then((result) => _sendCloudinaryRenameSuccess(res, result))
+                        .catch((err) => _sendCloudinaryRenameError(res, err));
+                })
+                .catch((err) => _sendAppMicroserviceError(req, res, err));
         })
-        .catch((err) => _sendAppMicroserviceError(req, res, err));
-    })
-    .catch((err) => _sendPayloadValidationError(res, err));
+        .catch((err) => _sendPayloadValidationError(res, err));
 });
 
 function _sendCloudinaryRenameSuccess(res, result)
 {
     Success.json({
         res,
-        message: "Successfully renamed file on Cloudinary",
+        message: 'Successfully renamed file on Cloudinary',
         data: {
             url: result.url,
         },
@@ -262,14 +243,14 @@ function _sendCloudinaryRenameError(res, err)
     {
         NotFound.json({
             res,
-            message: "That file does not exist on Cloudinary",
+            message: 'That file does not exist on Cloudinary',
             error: err.toJson(),
         });
     }
 
     else
     {
-        const errMsg = "Failed to rename file on Cloudinary";
+        const errMsg = 'Failed to rename file on Cloudinary';
         logger.error(errMsg, err);
     
         InternalServerError.json({
@@ -280,62 +261,58 @@ function _sendCloudinaryRenameError(res, err)
     }
 }
 
-
-
-
-
-/***********
+/** *********
  * DELETES *
- ***********/
+ ********** */
 
-app.delete("/delete", function(req, res)
+app.delete('/delete', (req, res) =>
 {
     validateDeleteFilesPayload(req.body)
-    .then(function (/*_*/)
-    {
-        AppMicroservice.v1.get(req.body.app)
-        .then(function (result)
+        .then((/* _ */) =>
         {
-            const app = result.data.data[0];
+            AppMicroservice.v1.get(req.body.app)
+                .then((result) =>
+                {
+                    const app = result.data.data[0];
     
-            CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
-            .then(function (/*getResult*/)
-            {
-                CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
-                .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
-                .catch((err) => _sendCloudinaryDeleteError(res, err));
-            })
-            .catch((err) => _sendCloudinaryGetError(res, err));
+                    CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
+                        .then((/* getResult */) =>
+                        {
+                            CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
+                                .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
+                                .catch((err) => _sendCloudinaryDeleteError(res, err));
+                        })
+                        .catch((err) => _sendCloudinaryGetError(res, err));
+                })
+                .catch((err) => _sendAppMicroserviceError(req, res, err));
         })
-        .catch((err) => _sendAppMicroserviceError(req, res, err));
-    })
-    .catch((err) => _sendPayloadValidationError(res, err));
+        .catch((err) => _sendPayloadValidationError(res, err));
 });
 
-app.delete("/delete-bulk", function(req, res)
+app.delete('/delete-bulk', (req, res) =>
 {
     validateDeleteBulkPayload(req.body)
-    .then(function (/*_*/)
-    {
-        AppMicroservice.v1.get(req.body.app)
-        .then(function (result)
+        .then((/* _ */) =>
         {
-            const app = result.data.data[0];
+            AppMicroservice.v1.get(req.body.app)
+                .then((result) =>
+                {
+                    const app = result.data.data[0];
     
-            CloudinaryController.deleteBulk(_getCloudinaryDataFromBody(req, app))
-            .then ((deleteResult) => _sendCloudinaryDeleteBulkSuccess(req, res, deleteResult))
-            .catch((err) => _sendCloudinaryDeleteError(res, err));
+                    CloudinaryController.deleteBulk(_getCloudinaryDataFromBody(req, app))
+                        .then((deleteResult) => _sendCloudinaryDeleteBulkSuccess(req, res, deleteResult))
+                        .catch((err) => _sendCloudinaryDeleteError(res, err));
+                })
+                .catch((err) => _sendAppMicroserviceError(req, res, err));
         })
-        .catch((err) => _sendAppMicroserviceError(req, res, err));
-    })
-    .catch((err) => _sendPayloadValidationError(res, err));
+        .catch((err) => _sendPayloadValidationError(res, err));
 });
 
-function _sendCloudinaryDeleteSuccess(res/*, result*/)
+function _sendCloudinaryDeleteSuccess(res/* , result */)
 {
     Success.json({
         res,
-        message: "Successfully deleted file from Cloudinary",
+        message: 'Successfully deleted file from Cloudinary',
     });
 }
 
@@ -352,7 +329,7 @@ function _sendCloudinaryDeleteBulkSuccess(req, res, { numOfFilesDeleted = 0 })
 
 function _sendCloudinaryDeleteError(res, err)
 {
-    const errMsg = "Failed to delete file from Cloudinary";
+    const errMsg = 'Failed to delete file from Cloudinary';
     logger.error(errMsg, err);
 
     InternalServerError.json({
@@ -362,19 +339,15 @@ function _sendCloudinaryDeleteError(res, err)
     });
 }
 
-
-
-
-
-/***********
+/** *********
  * HELPERS *
- ***********/
+ ********** */
 
 function _sendQueryValidationError(res, err)
 {
     ValidationError.json({
         res,
-        message: "Query Validation Error",
+        message: 'Query Validation Error',
         error: err,
     });
 }
@@ -397,7 +370,7 @@ function _sendAppMicroserviceError(req, res, err)
     {
         ValidationError.json({
             res,
-            message: "Invalid appId or appName",
+            message: 'Invalid appId or appName',
             data: {
                 ...req.query,
                 appId: req.query.appId || null,
@@ -409,7 +382,7 @@ function _sendAppMicroserviceError(req, res, err)
 
     else
     {
-        const errMsg = "An unknown error occurred while validating appId and appName";
+        const errMsg = 'An unknown error occurred while validating appId and appName';
         logger.error(errMsg, err.response.data.error || err, req.query, err.response.data);
 
         InternalServerError.json({
@@ -446,9 +419,5 @@ function _getCloudinaryDataFromBody(req, app)
         appId: app._id,
     };
 }
-
-
-
-
 
 module.exports = app;

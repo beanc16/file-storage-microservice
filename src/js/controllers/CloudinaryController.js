@@ -1,18 +1,17 @@
 // Cloudinary
-const { cloudinaryConfigEnum } = require("../enums");
-const cloudinary = require("cloudinary").v2;
+const { cloudinaryConfigEnum } = require('../enums/index.js');
+const cloudinary = require('cloudinary').v2;
+
 cloudinary.config(cloudinaryConfigEnum);
 
 // Files
-const appRoot = require("app-root-path");
+const appRoot = require('app-root-path');
 
 // Time
-const dayjs = require("dayjs");
+const dayjs = require('dayjs');
 
 // Models
-const { JsonError } = require("../errors");
-
-
+const { JsonError } = require('../errors/index.js');
 
 class CloudinaryController
 {
@@ -33,12 +32,14 @@ class CloudinaryController
 
             // Get file from cloudinary
             cloudinary.api.resource(cloudinaryFilePath, options)
-            .then((result) => {
-                resolve(result);
-            })
-            .catch((err) => {
-                reject(new JsonError(err));
-            });
+                .then((result) =>
+                {
+                    resolve(result);
+                })
+                .catch((err) =>
+                {
+                    reject(new JsonError(err));
+                });
         });
     }
 
@@ -64,30 +65,29 @@ class CloudinaryController
                 appId,
                 nestedFolders,
                 fileName || url,
-                (fileName === undefined)
+                (fileName === undefined),
             );
     
             // Upload file to cloudinary
             cloudinary.uploader.upload(url || dataUri, {
                 ...options,
-                "public_id": cloudinaryFilePath,
+                public_id: cloudinaryFilePath,
             })
-            .then((result) => {
-                resolve(result);
-            })
-            .catch((err) => {
-                reject(new JsonError(err));
-            });
+                .then((result) =>
+                {
+                    resolve(result);
+                })
+                .catch((err) =>
+                {
+                    reject(new JsonError(err));
+                });
         });
     }
 
     static async doImageOperation({
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
-        file: {
-            fileName = '',
-            fileExtension = '',
-        } = {},
+        file: { fileName = '', fileExtension = '' } = {},
         options = {
             effect: 'upscale',
         },
@@ -95,7 +95,8 @@ class CloudinaryController
     {
         return new Promise((resolve, reject) =>
         {
-            try {
+            try
+            {
                 // Get file paths
                 const {
                     cloudinaryFilePath,
@@ -105,7 +106,9 @@ class CloudinaryController
                 const htmlImg = cloudinary.image(cloudinaryFilePath, options);
                 const upscaledImageUrl = this._getSrcFromHtmlImgTag(htmlImg);
                 resolve(upscaledImageUrl);
-            } catch (err) {
+            }
+            catch (err)
+            {
                 reject(err);
             }
         });
@@ -113,14 +116,8 @@ class CloudinaryController
 
     static async rename({
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
-        old: {
-            nestedFolders: oldNestedFolders,
-            fileName: oldFileName,
-        },
-        new: {
-            nestedFolders: newNestedFolders,
-            fileName: newFileName,
-        },
+        old: { nestedFolders: oldNestedFolders, fileName: oldFileName },
+        new: { nestedFolders: newNestedFolders, fileName: newFileName },
         options = {
             invalidate: true,
         },
@@ -138,12 +135,14 @@ class CloudinaryController
     
             // Rename file in cloudinary
             cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options)
-            .then((result) => {
-                resolve(result);
-            })
-            .catch((err) => {
-                reject(new JsonError(err));
-            });
+                .then((result) =>
+                {
+                    resolve(result);
+                })
+                .catch((err) =>
+                {
+                    reject(new JsonError(err));
+                });
         });
     }
 
@@ -165,12 +164,14 @@ class CloudinaryController
     
             // Upload file to cloudinary
             cloudinary.uploader.destroy(cloudinaryFilePath, options)
-            .then((result) => {
-                resolve(result);
-            })
-            .catch((err) => {
-                reject(new JsonError(err));
-            });
+                .then((result) =>
+                {
+                    resolve(result);
+                })
+                .catch((err) =>
+                {
+                    reject(new JsonError(err));
+                });
         });
     }
 
@@ -192,51 +193,54 @@ class CloudinaryController
                 max_results: 500,
                 type: 'upload',
             })
-            .then(({ resources = [] }) => {
-                const resourcesToDelete = resources.reduce((acc, { created_at, public_id }) => {
-                    // Get the number of days passed since the resource was created
-                    const daysPassed = dayjs().diff(
-                        dayjs(created_at),
-                        'days',
-                        true
-                    );
-
-                    // Include the resource for deletion if enough time has passed
-                    if (daysPassed >= olderThanInDays)
+                .then(({ resources = [] }) =>
+                {
+                    const resourcesToDelete = resources.reduce((acc, { created_at, public_id }) =>
                     {
-                        acc.push(public_id);
+                    // Get the number of days passed since the resource was created
+                        const daysPassed = dayjs().diff(
+                            dayjs(created_at),
+                            'days',
+                            true,
+                        );
+
+                        // Include the resource for deletion if enough time has passed
+                        if (daysPassed >= olderThanInDays)
+                        {
+                            acc.push(public_id);
+                        }
+
+                        return acc;
+                    }, []);
+
+                    if (resourcesToDelete.length === 0)
+                    {
+                        resolve({ numOfFilesDeleted: 0 });
                     }
 
-                    return acc;
-                }, []);
-
-                if (resourcesToDelete.length === 0)
-                {
-                    resolve({ numOfFilesDeleted: 0 });
-                }
-
-                cloudinary.api.delete_resources(resourcesToDelete)
-                .then((result) => {
-                    resolve({
-                        ...result,
-                        numOfFilesDeleted: resourcesToDelete.length,
-                    });
+                    cloudinary.api.delete_resources(resourcesToDelete)
+                        .then((result) =>
+                        {
+                            resolve({
+                                ...result,
+                                numOfFilesDeleted: resourcesToDelete.length,
+                            });
+                        })
+                        .catch((err) =>
+                        {
+                            reject(new JsonError(err));
+                        });
                 })
-                .catch((err) => {
+                .catch((err) =>
+                {
                     reject(new JsonError(err));
                 });
-            })
-            .catch((err) => {
-                reject(new JsonError(err));
-            });
         });
     }
 
-
-
-    /***********
+    /** *********
      * HELPERS *
-     ***********/
+     ********** */
 
     static getExtensionFromUrl(url, includeDotBeforeExtension = true)
     {
@@ -250,16 +254,16 @@ class CloudinaryController
         return url.substring(indexOfExtension);
     }
 
-    static _constructFilePaths(appId, nestedFolders, fileName = "", fileExtension = "")
+    static _constructFilePaths(appId, nestedFolders, fileName = '', fileExtension = '')
     {
         // Local path
         const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
 
         // Cloudinary path
-        const fileNameWithoutExtension = (fileName.lastIndexOf(".") !== -1)
-            ? fileName.substring(0, fileName.lastIndexOf("."))
+        const fileNameWithoutExtension = (fileName.lastIndexOf('.') !== -1)
+            ? fileName.substring(0, fileName.lastIndexOf('.'))
             : fileName;
-        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileNameWithoutExtension}${fileExtension}`;
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ''}${fileNameWithoutExtension}${fileExtension}`;
         
         return {
             localFilePath,
@@ -274,17 +278,17 @@ class CloudinaryController
         // fileInfo is a URL
         if (isUrl)
         {
-            const fileUrlWithoutExtension = (fileInfo.lastIndexOf(".") !== -1)
-                ? fileInfo.substring(0, fileInfo.lastIndexOf("."))
+            const fileUrlWithoutExtension = (fileInfo.lastIndexOf('.') !== -1)
+                ? fileInfo.substring(0, fileInfo.lastIndexOf('.'))
                 : fileInfo;
 
             // Remove everything from the URL before the file name
-            fileName = (fileUrlWithoutExtension.lastIndexOf("/") !== -1)
-                ? fileUrlWithoutExtension.substring(fileInfo.lastIndexOf("/"))
+            fileName = (fileUrlWithoutExtension.lastIndexOf('/') !== -1)
+                ? fileUrlWithoutExtension.substring(fileInfo.lastIndexOf('/'))
                 : fileInfo;
         }
 
-        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ""}${fileName}`;
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ''}${fileName}`;
         
         return {
             cloudinaryFilePath,
@@ -297,7 +301,5 @@ class CloudinaryController
         return htmlImgTag.replace(regex, '$2');
     }
 }
-
-
 
 module.exports = CloudinaryController;

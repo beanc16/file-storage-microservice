@@ -1,8 +1,6 @@
-const { JoiRequired } = require("@beanc16/joi-helpers");
-const Joi = require("joi");
-const fileSchemas = require("./helpers");
-
-
+const { JoiRequired } = require('@beanc16/joi-helpers');
+const Joi = require('joi');
+const fileSchemas = require('./helpers/index.js');
 
 const deleteFilesSchema = JoiRequired.object({
     app: fileSchemas.appRequired,
@@ -14,8 +12,6 @@ const deleteBulkSchema = JoiRequired.object({
     nestedFolders: fileSchemas.nestedFolders,
     olderThanInDays: Joi.number().min(1).optional(),
 });
-
-
 
 module.exports = {
     deleteFilesSchema,

@@ -1,10 +1,8 @@
-const appSchemas = require("./app");
-const fileSchemas = require("./file");
-const fileNameSchemas = require("./fileName");
-const imageOptionsSchemas = require("./imageOptions");
-const nestedFoldersSchemas = require("./nestedFolders");
-
-
+const appSchemas = require('./app.js');
+const fileSchemas = require('./file.js');
+const fileNameSchemas = require('./fileName.js');
+const imageOptionsSchemas = require('./imageOptions.js');
+const nestedFoldersSchemas = require('./nestedFolders.js');
 
 module.exports = {
     ...appSchemas,

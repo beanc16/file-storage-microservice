@@ -1,8 +1,6 @@
-const Joi = require("joi");
-const { JoiRequired } = require("@beanc16/joi-helpers");
-const fileSchemas = require("./helpers");
-
-
+const Joi = require('joi');
+const { JoiRequired } = require('@beanc16/joi-helpers');
+const fileSchemas = require('./helpers/index.js');
 
 const getFilesSchema = JoiRequired.alternatives().try(
     JoiRequired.object({
@@ -20,8 +18,6 @@ const getFilesSchema = JoiRequired.alternatives().try(
         imageOptions: fileSchemas.imageOptions,
     }),
 );
-
-
 
 module.exports = {
     getFilesSchema,

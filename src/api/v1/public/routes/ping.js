@@ -1,97 +1,73 @@
-/************
+/** **********
  * REQUIRES *
- ************/
+ *********** */
 
 // Routing
-const express = require("express");
+const express = require('express');
+
 const app = express();
 
-
 // Response
-const { Success } = require("dotnet-responses");
+const { Success } = require('dotnet-responses');
 
-
-
-
-
-/********
+/** ******
  * GETS *
- ********/
+ ******* */
 
-app.get("/", function(req, res)
+app.get('/', (req, res) =>
 {
     Success.json({
         res,
-        message: "Pong",
+        message: 'Pong',
     });
 });
 
-
-
-
-
-/*********
+/** *******
  * POSTS *
- *********/
+ ******** */
 
-app.post("/", function(req, res)
+app.post('/', (req, res) =>
 {
     Success.json({
         res,
-        message: "Pong",
+        message: 'Pong',
     });
 });
 
-
-
-
-
-/*******
+/** *****
  * PUT *
- *******/
+ ****** */
 
-app.put("/", function(req, res)
+app.put('/', (req, res) =>
 {
     Success.json({
         res,
-        message: "Pong",
+        message: 'Pong',
     });
 });
 
-
-
-
-
-/***********
+/** *********
  * PATCHES *
- ***********/
+ ********** */
 
-app.patch("/", function(req, res)
+app.patch('/', (req, res) =>
 {
     Success.json({
         res,
-        message: "Pong",
+        message: 'Pong',
     });
 });
 
-
-
-
-
-/***********
+/** *********
  * DELETES *
- ***********/
+ ********** */
 
-app.delete("/", function(req, res)
+app.delete('/', (req, res) =>
 {
     Success.json({
         res,
-        message: "Pong",
+        message: 'Pong',
     });
 });
-
-
-
-
 
 module.exports = app;

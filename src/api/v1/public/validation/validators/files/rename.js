@@ -1,25 +1,21 @@
-const { renameFilesSchema } = require("../../schemas");
-const { validateJoiSchema } = require("@beanc16/joi-helpers");
-
-
+const { validateJoiSchema } = require('@beanc16/joi-helpers');
+const { renameFilesSchema } = require('../../schemas/index.js');
 
 function validateRenameFilesPayload(payload)
 {
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
         validateJoiSchema(renameFilesSchema, payload)
-            .then(function (value)
+            .then((value) =>
             {
                 resolve(value);
             })
-            .catch(function (error)
+            .catch((error) =>
             {
                 reject(error);
             });
     });
 }
-
-
 
 module.exports = {
     validateRenameFilesPayload,

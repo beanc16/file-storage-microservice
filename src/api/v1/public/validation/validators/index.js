@@ -1,6 +1,4 @@
-const filesValidators = require("./files");
-
-
+const filesValidators = require('./files/index.js');
 
 module.exports = {
     ...filesValidators,

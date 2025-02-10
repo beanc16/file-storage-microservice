@@ -6,6 +6,4 @@ const cloudinaryConfigEnum = {
 
 Object.freeze(cloudinaryConfigEnum);
 
-
-
 module.exports = cloudinaryConfigEnum;

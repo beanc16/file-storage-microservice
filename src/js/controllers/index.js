@@ -1,6 +1,4 @@
-const CloudinaryController = require("./CloudinaryController");
-
-
+const CloudinaryController = require('./CloudinaryController.js');
 
 module.exports = {
     CloudinaryController,
