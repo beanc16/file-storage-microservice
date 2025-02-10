@@ -19,10 +19,6 @@ const app = express();
 const publicEndpoints = require("./public");
 app.use(`/`, publicEndpoints);
 
-// Private
-const privateEndpoints = require("./private");
-app.use(`/private`, privateEndpoints);
-
 
 
 
