@@ -2,11 +2,15 @@
 
 A microservice for storing files in the Cloud.
 
-<!--
-API Documentation:
-[//]: # https://file-storage-microservice-api.herokuapp.com/api-docs
--->
 
-Back-End Code (Node.js & Cloudinary):
-https://github.com/beanc16/file-storage-microservice
+## Setup
 
+**Step 1:** Download dependencies (requires a github access token tied to account with access to privately hosted NPM packages in the `@beanc16` namespace)
+```bash
+npm install
+```
+
+**Step 2:** Enable shared git hooks
+```bash
+git config core.hooksPath .githooks
+```
