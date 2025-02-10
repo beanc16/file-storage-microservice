@@ -49,13 +49,13 @@ app.get('/', (req, res) =>
         .then((/* _ */) =>
         {
             AppMicroservice.v1.get(_getAppDataFromQuery(req))
-                .then((result) =>
+                .then((appResult) =>
                 {
-                    const app = result.data.data[0];
-                    const cloudinaryData = _getCloudinaryDataFromQuery(req, app);
+                    const appData = appResult.data.data[0];
+                    const cloudinaryData = _getCloudinaryDataFromQuery(req, appData);
 
                     CloudinaryController.get(cloudinaryData)
-                        .then((result) =>
+                        .then((cloudinaryResult) =>
                         {
                             const {
                                 query: {
@@ -65,10 +65,10 @@ app.get('/', (req, res) =>
 
                             if (!imageOptions)
                             {
-                                return _sendCloudinaryGetSuccess(res, result);
+                                return _sendCloudinaryGetSuccess(res, cloudinaryResult);
                             }
 
-                            const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+                            const fileExtension = CloudinaryController.getExtensionFromUrl(cloudinaryResult.url);
 
                             CloudinaryController.doImageOperation({
                                 ...cloudinaryData,
@@ -137,13 +137,13 @@ app.post('/upload', (req, res) =>
         .then((/* _ */) =>
         {
             AppMicroservice.v1.get(req.body.app)
-                .then((result) =>
+                .then((appResult) =>
                 {
-                    const app = result.data.data[0];
-                    const cloudinaryData = _getCloudinaryDataFromBody(req, app);
+                    const appData = appResult.data.data[0];
+                    const cloudinaryData = _getCloudinaryDataFromBody(req, appData);
 
                     CloudinaryController.upload(cloudinaryData)
-                        .then((result) =>
+                        .then((cloudinaryResult) =>
                         {
                             const {
                                 body: {
@@ -153,10 +153,10 @@ app.post('/upload', (req, res) =>
 
                             if (!imageOptions)
                             {
-                                return _sendCloudinaryUploadSuccess(res, result);
+                                return _sendCloudinaryUploadSuccess(res, cloudinaryResult);
                             }
 
-                            const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+                            const fileExtension = CloudinaryController.getExtensionFromUrl(cloudinaryResult.url);
 
                             CloudinaryController.doImageOperation({
                                 ...cloudinaryData,
@@ -211,11 +211,11 @@ app.patch('/rename', (req, res) =>
         .then((/* _ */) =>
         {
             AppMicroservice.v1.get(req.body.app)
-                .then((result) =>
+                .then((appResult) =>
                 {
-                    const app = result.data.data[0];
-    
-                    CloudinaryController.rename(_getCloudinaryDataFromBody(req, app))
+                    const appData = appResult.data.data[0];
+
+                    CloudinaryController.rename(_getCloudinaryDataFromBody(req, appData))
                         .then((result) => _sendCloudinaryRenameSuccess(res, result))
                         .catch((err) => _sendCloudinaryRenameError(res, err));
                 })
@@ -271,14 +271,14 @@ app.delete('/delete', (req, res) =>
         .then((/* _ */) =>
         {
             AppMicroservice.v1.get(req.body.app)
-                .then((result) =>
+                .then((appResult) =>
                 {
-                    const app = result.data.data[0];
-    
-                    CloudinaryController.get(_getCloudinaryDataFromBody(req, app))
+                    const appData = appResult.data.data[0];
+
+                    CloudinaryController.get(_getCloudinaryDataFromBody(req, appData))
                         .then((/* getResult */) =>
                         {
-                            CloudinaryController.delete(_getCloudinaryDataFromBody(req, app))
+                            CloudinaryController.delete(_getCloudinaryDataFromBody(req, appData))
                                 .then((deleteResult) => _sendCloudinaryDeleteSuccess(res, deleteResult))
                                 .catch((err) => _sendCloudinaryDeleteError(res, err));
                         })
@@ -297,9 +297,9 @@ app.delete('/delete-bulk', (req, res) =>
             AppMicroservice.v1.get(req.body.app)
                 .then((result) =>
                 {
-                    const app = result.data.data[0];
-    
-                    CloudinaryController.deleteBulk(_getCloudinaryDataFromBody(req, app))
+                    const appData = result.data.data[0];
+
+                    CloudinaryController.deleteBulk(_getCloudinaryDataFromBody(req, appData))
                         .then((deleteResult) => _sendCloudinaryDeleteBulkSuccess(req, res, deleteResult))
                         .catch((err) => _sendCloudinaryDeleteError(res, err));
                 })
@@ -402,21 +402,21 @@ function _getAppDataFromQuery(req)
     };
 }
 
-function _getCloudinaryDataFromQuery(req, app)
+function _getCloudinaryDataFromQuery(req, appData)
 {
     return {
         ...req.query,
-        appId: app._id,
+        appId: appData._id,
         appName: undefined,
     };
 }
 
-function _getCloudinaryDataFromBody(req, app)
+function _getCloudinaryDataFromBody(req, appData)
 {
     return {
         ...req.body,
         app: undefined,
-        appId: app._id,
+        appId: appData._id,
     };
 }
 

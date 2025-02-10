@@ -2,13 +2,13 @@
  * REQUIRES *
  *********** */
 
+// Telemetry
+const { logger, express: { errorHandler, logEndpointDuration } } = require('@beanc16/logger');
+
 // Read environment variables
 const dotenv = require('dotenv');
 
 dotenv.config();
-
-// Important variables
-const { serverInfoEnum: serverInfo } = require('./js/enums/index.js');
 
 // Routing
 const express = require('express');
@@ -20,8 +20,8 @@ const cors = require('cors');
 
 app.use(cors());
 
-// Telemetry
-const { logger, express: { errorHandler, logEndpointDuration } } = require('@beanc16/logger');
+// Important variables
+const { serverInfoEnum: serverInfo } = require('./js/enums/index.js');
 
 // Swagger
 /*
@@ -65,7 +65,7 @@ app.use((err, req, res, next) => errorHandler(err, req, res, next));
  * PORT *
  ******* */
 
-app.listen(serverInfo.port, async (err) =>
+app.listen(serverInfo.port, (err) =>
 {
     if (err) logger.error('Error in server setup', err);
     logger.info(`App listening on port ${serverInfo.port}`);

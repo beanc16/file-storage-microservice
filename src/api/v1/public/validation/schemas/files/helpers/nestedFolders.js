@@ -1,11 +1,11 @@
 const Joi = require('joi');
 
 // Lowercase, hyphen, and forward slash
-const _nestedFoldersRegex = /^[a-z\-/]+$/;
+const nestedFoldersRegex = /^[a-z\-/]+$/;
 
 const nestedFolders = Joi.string()
     .allow('')
-    .pattern(_nestedFoldersRegex);
+    .pattern(nestedFoldersRegex);
 const nestedFoldersRequired = nestedFolders.required();
 
 module.exports = {

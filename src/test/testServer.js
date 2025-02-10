@@ -2,6 +2,8 @@
  * REQUIRES *
  *********** */
 
+const { logger } = require('@beanc16/logger');
+
 // Routing
 const express = require('express');
 
@@ -18,11 +20,14 @@ const { Success, InternalServerError } = require('dotnet-responses');
 // Sending images
 const axios = require('axios');
 
+// Image to URI
+const imageToUri = require('image-to-uri');
+
 /** ******
  * GETS *
  ******* */
 
-app.get('/ping', (req, res) =>
+app.get('/ping', (_req, res) =>
 {
     Success.json({
         res,
@@ -34,7 +39,7 @@ app.get('/ping', (req, res) =>
  * POSTS *
  ******** */
 
-app.post('/upload', (req, res) =>
+app.post('/upload', (_req, res) =>
 {
     const data = {
         app: {
@@ -42,7 +47,7 @@ app.post('/upload', (req, res) =>
             searchName: 'file-storage-microservice',
         },
         file: {
-            dataUri: require('image-to-uri')('uploads/capoo-bugcat.gif'),
+            dataUri: imageToUri('uploads/capoo-bugcat.gif'),
             fileName: 'capoo-bugcat',
             // fileName: "bugcatStareRight",
             // url: "https://cdn.discordapp.com/emojis/927237004469628988.png",
@@ -71,8 +76,8 @@ app.post('/upload', (req, res) =>
  * PORT *
  ******* */
 
-app.listen(7999, async (err) =>
+app.listen(7999, (err) =>
 {
-    if (err) console.error('Error in server setup', err);
-    console.info('App listening on port 7999');
+    if (err) logger.error('Error in server setup', err);
+    logger.info('App listening on port 7999');
 });

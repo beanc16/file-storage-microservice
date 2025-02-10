@@ -1,5 +1,4 @@
 // Cloudinary
-const { cloudinaryConfigEnum } = require('../enums/index.js');
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config(cloudinaryConfigEnum);
@@ -11,6 +10,7 @@ const appRoot = require('app-root-path');
 const dayjs = require('dayjs');
 
 // Models
+const { cloudinaryConfigEnum } = require('../enums/index.js');
 const { JsonError } = require('../errors/index.js');
 
 class CloudinaryController

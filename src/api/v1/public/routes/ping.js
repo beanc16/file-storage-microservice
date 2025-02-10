@@ -14,7 +14,7 @@ const { Success } = require('dotnet-responses');
  * GETS *
  ******* */
 
-app.get('/', (req, res) =>
+app.get('/', (_req, res) =>
 {
     Success.json({
         res,
@@ -26,7 +26,7 @@ app.get('/', (req, res) =>
  * POSTS *
  ******** */
 
-app.post('/', (req, res) =>
+app.post('/', (_req, res) =>
 {
     Success.json({
         res,
@@ -38,7 +38,7 @@ app.post('/', (req, res) =>
  * PUT *
  ****** */
 
-app.put('/', (req, res) =>
+app.put('/', (_req, res) =>
 {
     Success.json({
         res,
@@ -50,7 +50,7 @@ app.put('/', (req, res) =>
  * PATCHES *
  ********** */
 
-app.patch('/', (req, res) =>
+app.patch('/', (_req, res) =>
 {
     Success.json({
         res,
@@ -62,7 +62,7 @@ app.patch('/', (req, res) =>
  * DELETES *
  ********** */
 
-app.delete('/', (req, res) =>
+app.delete('/', (_req, res) =>
 {
     Success.json({
         res,
