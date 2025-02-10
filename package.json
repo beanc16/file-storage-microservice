@@ -12,10 +12,7 @@
     "lint": "eslint --cache --ext js --ext ts ./",
     "lint:fix": "eslint --cache --fix --ext js --ext ts ./",
     "test": "jest --passWithNoTests --detectOpenHandles",
-    "test:watch": "jest --watch",
-    "preversion": "npm run lint",
-    "version": "git add -A src",
-    "postversion": "git push && git push --tags"
+    "test:watch": "jest --watch"
   },
   "eslintConfig": {
       "extends": "lintification"
