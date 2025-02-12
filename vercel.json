@@ -1,11 +1,20 @@
 {
-    "version": 2,
-    "builds": [{
-        "src": "./dist/index.js",
-        "use": "@vercel/node"
-    }],
+    "buildCommand": "npm run build",
+    "outputDirectory": "api",
+    "framework": null,
+    "functions": {
+        "**/*.js": {
+            "runtime": "@vercel/node@3.2.2",
+            "includeFiles": "api/**"
+        }
+    },
     "routes": [{
         "src": "/(.*)",
-        "dest": "/"
-    }]
+        "dest": "api/index.js"
+    }],
+    "git": {
+        "deploymentEnabled": {
+            "main": false
+        }
+    }
 }

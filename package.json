@@ -2,10 +2,14 @@
   "name": "file-storage-microservice",
   "version": "1.4.1",
   "description": "A microservice for storing files in the Cloud",
-  "main": "dist/index.js",
-  "types": "dist/types/index.d.ts",
+  "main": "api/index.js",
+  "types": "api/types/index.d.ts",
+  "files": [
+    "api/**/*"
+  ],
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "vercel-build": "npm run build",
+    "build": "rm -rf api && tsc",
     "start": "npm run build && node dist/index.js",
     "start:dev": "node --loader ts-node/esm --watch src/index.js",
     "start-test-server": "nodemon src/test/testServer.js",
