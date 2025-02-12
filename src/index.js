@@ -51,7 +51,7 @@ const apiEndpoints = require('./api/index.js');
 app.use(`/${apiPrefix}`, apiEndpoints);
 
 // Errors
-const errorEndpoints = require('./apiErrors/index.js');
+const errorEndpoints = require('./all/routes/errors.js');
 
 app.use('/', errorEndpoints);
 

@@ -1,0 +1,357 @@
+import appRoot from 'app-root-path';
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+import dayjs from 'dayjs';
+
+import { cloudinaryConfigEnum } from '../constants.js';
+import { JsonError } from '../errors/index.js';
+import type {
+    CloudinaryDeleteResourcesResponse,
+    CloudinaryDestroyResponse,
+    CloudinaryResource,
+} from './types/Cloudinary.js';
+
+cloudinary.config(cloudinaryConfigEnum);
+
+interface CloudinaryOptions
+{
+    effect: 'upscale';
+    invalidate?: boolean;
+    overwrite?: boolean;
+}
+
+interface DeleteResponse
+{
+    result: string;
+}
+
+interface DeleteBulkResponse
+{
+    numOfFilesDeleted: number;
+}
+
+export class CloudinaryController
+{
+    public static async get({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        fileName,
+        options = {},
+    }: {
+        appId: string | undefined;
+        nestedFolders: string;
+        fileName: string;
+        options?: Omit<CloudinaryOptions, 'effect'>;
+    }): Promise<CloudinaryResource>
+    {
+        try
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this.constructFilePaths(appId, nestedFolders, fileName);
+
+            // Get file from cloudinary
+            return await cloudinary.api.resource(cloudinaryFilePath, options) as CloudinaryResource;
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    public static async upload({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        file: {
+            dataUri,
+            fileName,
+            url,
+        } = {},
+        options = {
+            overwrite: false,
+        },
+    }: {
+        appId: string | undefined;
+        nestedFolders: string;
+        file: {
+            dataUri?: string;
+            fileName?: string;
+            url?: string;
+        };
+        options?: Pick<CloudinaryOptions, 'overwrite'>;
+    }): Promise<UploadApiResponse>
+    {
+        try
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this.constructFilePathsFromUrl(
+                appId,
+                nestedFolders,
+                (fileName || url) as string, // TODO: Update parameters to make one of these required later
+                (fileName === undefined),
+            );
+
+            // Upload file to cloudinary
+            return await cloudinary.uploader.upload((url || dataUri) as string, { // TODO: Update parameters to make one of these required later
+                ...options,
+                public_id: cloudinaryFilePath,
+            });
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    public static doImageOperation({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        file: { fileName = '', fileExtension = '' } = {},
+        options = {
+            effect: 'upscale',
+        },
+    }: {
+        appId: string | undefined;
+        nestedFolders: string;
+        file: {
+            fileName?: string;
+            fileExtension?: string;
+        };
+        options?: Pick<CloudinaryOptions, 'effect'>;
+    }): string
+    {
+        try
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath,
+            } = this.constructFilePaths(appId, nestedFolders, fileName, fileExtension);
+
+            // Do image effect
+            const htmlImg = cloudinary.image(cloudinaryFilePath, options);
+            const upscaledImageUrl = this.getSrcFromHtmlImgTag(htmlImg);
+            return upscaledImageUrl;
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    public static async rename({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        old: { nestedFolders: oldNestedFolders, fileName: oldFileName },
+        new: { nestedFolders: newNestedFolders, fileName: newFileName },
+        options = {
+            invalidate: true,
+        },
+    }: {
+        appId: string | undefined;
+        old: {
+            nestedFolders: string;
+            fileName: string;
+        };
+        new: {
+            nestedFolders: string;
+            fileName: string;
+        };
+        options?: Pick<CloudinaryOptions, 'invalidate'>;
+    }): Promise<CloudinaryResource>
+    {
+        try
+        {
+            // Get file paths
+            const {
+                cloudinaryFilePath: oldCloudinaryFilePath,
+            } = this.constructFilePaths(appId, oldNestedFolders, oldFileName);
+            const {
+                cloudinaryFilePath: newCloudinaryFilePath,
+            } = this.constructFilePaths(appId, newNestedFolders, newFileName);
+
+            // Rename file in cloudinary
+            return await cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options) as CloudinaryResource;
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    public static async delete({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        fileName,
+        options = {
+            invalidate: true,
+        },
+    }: {
+        appId: string | undefined;
+        nestedFolders: string;
+        fileName: string;
+        options?: Pick<CloudinaryOptions, 'invalidate'>;
+    }): Promise<DeleteResponse>
+    {
+        try
+        {
+            const {
+                cloudinaryFilePath,
+            } = this.constructFilePaths(appId, nestedFolders, fileName);
+
+            return await cloudinary.uploader.destroy(cloudinaryFilePath, options) as CloudinaryDestroyResponse;
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    public static async deleteBulk({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        olderThanInDays = 7,
+    }: {
+        appId: string | undefined;
+        nestedFolders: string;
+        olderThanInDays: number;
+    }): Promise<DeleteBulkResponse>
+    {
+        try
+        {
+            const {
+                cloudinaryFilePath,
+            } = this.constructFilePaths(appId, nestedFolders);
+
+            const { resources = [] } = await cloudinary.api.resources({
+                prefix: cloudinaryFilePath,
+                max_results: 500,
+                type: 'upload',
+            }) as {
+                resources: CloudinaryResource[];
+            };
+
+            const { chunkedResourcesToDelete } = resources.reduce<{
+                chunkedResourcesToDelete: string[][];
+                curChunk: number;
+            }>((acc, { created_at, public_id }) =>
+            {
+                // Get the number of days passed since the resource was created
+                const daysPassed = dayjs().diff(
+                    dayjs(created_at),
+                    'days',
+                    true,
+                );
+
+                // Include the resource for deletion if enough time has passed
+                if (daysPassed >= olderThanInDays)
+                {
+                    acc.chunkedResourcesToDelete[acc.curChunk].push(public_id);
+                }
+
+                // Cloudinary can only delete 100 resources at a time.
+                // Thus, chunk the resources to delete into groups of 100.
+                if (acc.chunkedResourcesToDelete[acc.curChunk].length >= 100)
+                {
+                    acc.curChunk += 1;
+                    acc.chunkedResourcesToDelete.push([]);
+                }
+
+                return acc;
+            }, {
+                chunkedResourcesToDelete: [[]],
+                curChunk: 0,
+            });
+
+            // Exit early if there are no resources to delete
+            if (
+                chunkedResourcesToDelete.length === 1
+                && chunkedResourcesToDelete[0].length === 0
+            )
+            {
+                return { numOfFilesDeleted: 0 };
+            }
+
+            // Delete all resources
+            const deletePromises = chunkedResourcesToDelete.map(async (resourcesToDelete) =>
+                await (cloudinary.api.delete_resources(resourcesToDelete) as Promise<CloudinaryDeleteResourcesResponse>),
+            );
+
+            const results = await Promise.all(deletePromises);
+            return results.reduce((acc, result) =>
+            {
+                return {
+                    ...acc,
+                    ...result,
+                };
+            }, { numOfFilesDeleted: resources.length });
+        }
+
+        catch (error)
+        {
+            throw new JsonError(error as Error);
+        }
+    }
+
+    private static constructFilePaths(
+        appId: string | undefined,
+        nestedFolders: string,
+        fileName = '',
+        fileExtension = '',
+    ): { localFilePath: string; cloudinaryFilePath: string }
+    {
+        // Local path
+        const localFilePath = appRoot.resolve(`/uploads/${fileName}`);
+
+        // Cloudinary path
+        const fileNameWithoutExtension = (fileName.lastIndexOf('.') !== -1)
+            ? fileName.substring(0, fileName.lastIndexOf('.'))
+            : fileName;
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ''}${fileNameWithoutExtension}${fileExtension}`;
+
+        return {
+            localFilePath,
+            cloudinaryFilePath,
+        };
+    }
+
+    private static constructFilePathsFromUrl(
+        appId: string | undefined,
+        nestedFolders: string,
+        fileInfo: string,
+        isUrl: boolean,
+    ): { cloudinaryFilePath: string }
+    {
+        let fileName = fileInfo;
+
+        // fileInfo is a URL
+        if (isUrl)
+        {
+            const fileUrlWithoutExtension = (fileInfo.lastIndexOf('.') !== -1)
+                ? fileInfo.substring(0, fileInfo.lastIndexOf('.'))
+                : fileInfo;
+
+            // Remove everything from the URL before the file name
+            fileName = (fileUrlWithoutExtension.lastIndexOf('/') !== -1)
+                ? fileUrlWithoutExtension.substring(fileInfo.lastIndexOf('/'))
+                : fileInfo;
+        }
+
+        const cloudinaryFilePath = `apps/${appId}/${(nestedFolders) ? `${nestedFolders}/` : ''}${fileName}`;
+
+        return {
+            cloudinaryFilePath,
+        };
+    }
+
+    private static getSrcFromHtmlImgTag(htmlImgTag: string): string
+    {
+        const regex = /(<img.+src=["'])(.*)(["'].+>)/ig;
+        return htmlImgTag.replace(regex, '$2');
+    }
+}
