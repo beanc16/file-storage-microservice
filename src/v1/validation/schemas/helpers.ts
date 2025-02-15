@@ -11,13 +11,11 @@ export const app = Joi.alternatives().try(
         searchName: Joi.string().optional(),
     }).required(),
 );
-export const appRequired = app.required();
 
 // File Name
 const fileNameRegex = /^[\w- ]+$/;
 
 export const fileName = Joi.string().pattern(fileNameRegex);
-export const fileNameRequired = fileName.required();
 
 // File
 export const file = Joi.alternatives().try(
@@ -30,7 +28,6 @@ export const file = Joi.alternatives().try(
         fileName: Joi.string().optional(),
     }).required(),
 );
-export const fileRequired = file.required();
 
 // Image Options
 const cloudinaryBackground = Joi.alternatives().try(
@@ -64,7 +61,6 @@ export const imageOptions = Joi.object({
     background: cloudinaryBackground.optional(),
     effect: Joi.string().valid('upscale').optional(),
 });
-export const imageOptionsRequired = imageOptions.required();
 
 // Nested Folders
 // Lowercase, hyphen, and forward slash
@@ -73,4 +69,3 @@ const nestedFoldersRegex = /^[a-z\-/]+$/;
 export const nestedFolders = Joi.string()
     .allow('')
     .pattern(nestedFoldersRegex);
-export const nestedFoldersRequired = nestedFolders.required();
