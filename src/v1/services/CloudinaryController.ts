@@ -12,11 +12,19 @@ import type {
 
 cloudinary.config(cloudinaryConfigEnum);
 
-interface CloudinaryOptions
+export interface CloudinaryOptions
 {
     effect: 'upscale';
     invalidate?: boolean;
     overwrite?: boolean;
+}
+
+export interface GetCloudinaryOptions
+{
+    appId: string | undefined;
+    nestedFolders: string;
+    fileName: string;
+    options?: Omit<CloudinaryOptions, 'effect'>;
 }
 
 interface DeleteResponse
@@ -36,12 +44,7 @@ export class CloudinaryController
         nestedFolders,
         fileName,
         options = {},
-    }: {
-        appId: string | undefined;
-        nestedFolders: string;
-        fileName: string;
-        options?: Omit<CloudinaryOptions, 'effect'>;
-    }): Promise<CloudinaryResource>
+    }: GetCloudinaryOptions): Promise<CloudinaryResource>
     {
         try
         {
@@ -296,6 +299,18 @@ export class CloudinaryController
         {
             throw new JsonError(error as Error);
         }
+    }
+
+    public static getExtensionFromUrl(url: string, includeDotBeforeExtension = true): string
+    {
+        let indexOfExtension = url.lastIndexOf('.');
+
+        if (!includeDotBeforeExtension)
+        {
+            indexOfExtension += 1;
+        }
+
+        return url.substring(indexOfExtension);
     }
 
     private static constructFilePaths(
