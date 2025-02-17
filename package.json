@@ -19,7 +19,8 @@
     "test:watch": "jest --watch"
   },
   "eslintConfig": {
-    "extends": "lintification"
+    "extends": "lintification",
+    "ignorePatterns": ["api"]
   },
   "dependencies": {
     "@beanc16/joi-helpers": "^0.5.0",
