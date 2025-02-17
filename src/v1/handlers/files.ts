@@ -1,13 +1,23 @@
+import type { AppGetParametersV1 } from '@beanc16/microservices-abstraction';
 import { Success } from 'dotnet-responses';
 import express from 'express';
 
-import { CloudinaryController, CloudinaryOptions } from '../services/CloudinaryController.js';
+import {
+    CloudinaryController,
+    type CloudinaryOptions,
+    type UploadCloudinaryOptions,
+} from '../services/CloudinaryController.js';
 import {
     getAppData,
     getCloudinaryData,
+    GetCloudinaryDataResponse,
     sendQueryValidationError,
 } from '../services/responseHelpers.js';
-import { getFilesSchema, validateJoiSchema } from '../validation/index.js';
+import {
+    getFilesSchema,
+    uploadFilesSchema,
+    validateJoiSchema,
+} from '../validation/index.js';
 
 export const getFiles = async (req: express.Request, res: express.Response): Promise<void> =>
 {
@@ -27,7 +37,13 @@ export const getFiles = async (req: express.Request, res: express.Response): Pro
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(req, res, appData, 'query');
+    const cloudinaryData = await getCloudinaryData(
+        req,
+        res,
+        appData,
+        'query',
+        'Failed to retrieve file from Cloudinary',
+    ) as GetCloudinaryDataResponse | undefined;
 
     if (!cloudinaryData)
     {
@@ -36,11 +52,13 @@ export const getFiles = async (req: express.Request, res: express.Response): Pro
 
     const {
         query: {
-            imageOptions: untypedImageOptions,
+            imageOptions,
         },
-    } = req;
-
-    const imageOptions = untypedImageOptions as unknown as CloudinaryOptions;
+    } = req as unknown as {
+        query: {
+            imageOptions: CloudinaryOptions | undefined;
+        };
+    };
 
     if (!imageOptions)
     {
@@ -68,6 +86,81 @@ export const getFiles = async (req: express.Request, res: express.Response): Pro
     Success.json({
         res,
         message: 'Successfully retrieved file from Cloudinary',
+        data: {
+            url: upscaledUrl,
+        },
+    });
+    return undefined;
+};
+
+export const uploadFile = async (req: express.Request, res: express.Response): Promise<void> =>
+{
+    try
+    {
+        validateJoiSchema(uploadFilesSchema, req.body);
+    }
+    catch (error)
+    {
+        sendQueryValidationError(res, error as Error);
+    }
+
+    const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
+
+    if (!appData)
+    {
+        return undefined;
+    }
+
+    const cloudinaryData = await getCloudinaryData(
+        req,
+        res,
+        appData,
+        'body',
+        'Failed to save file to Cloudinary',
+    ) as UploadCloudinaryOptions | undefined;
+
+    if (!cloudinaryData)
+    {
+        return undefined;
+    }
+    const result = await CloudinaryController.upload(cloudinaryData);
+
+    const {
+        query: {
+            imageOptions,
+        },
+    } = req as unknown as {
+        query: {
+            imageOptions: CloudinaryOptions | undefined;
+        };
+    };
+
+    if (!imageOptions)
+    {
+        Success.json({
+            res,
+            message: 'Successfully saved file to Cloudinary',
+            data: {
+                url: result.url,
+            },
+        });
+        return undefined;
+    }
+
+    const fileExtension = CloudinaryController.getExtensionFromUrl(result.url);
+
+    const upscaledUrl = CloudinaryController.doImageOperation({
+        ...cloudinaryData,
+        file: {
+            ...cloudinaryData.file,
+            fileExtension,
+        },
+        options: imageOptions,
+    });
+
+    Success.json({
+        res,
+        message: 'Successfully saved file to Cloudinary',
         data: {
             url: upscaledUrl,
         },

@@ -1,5 +1,9 @@
 import { logger } from '@beanc16/logger';
-import { AppBaseResponseV1, AppMicroservice } from '@beanc16/microservices-abstraction';
+import {
+    type AppBaseResponseV1,
+    type AppGetParametersV1,
+    AppMicroservice,
+} from '@beanc16/microservices-abstraction';
 import type { AxiosError } from 'axios';
 import {
     InternalServerError,
@@ -9,20 +13,24 @@ import {
 import express from 'express';
 
 import { JsonError } from '../errors/JsonError.js';
-import { CloudinaryController, GetCloudinaryOptions } from './CloudinaryController.js';
+import {
+    CloudinaryController,
+    type GetCloudinaryOptions,
+    type UploadCloudinaryOptions,
+} from './CloudinaryController.js';
 import type { CloudinaryResource } from './types/Cloudinary.js';
 
 type AppData = AppBaseResponseV1['data']['0'];
 
-type GetCloudinaryDataResponse = GetCloudinaryOptions & CloudinaryResource;
+export type GetCloudinaryDataResponse = GetCloudinaryOptions & CloudinaryResource;
 
-export const getAppData = async (req: express.Request, res: express.Response): Promise<AppData | undefined> =>
+export const getAppData = async (req: express.Request, res: express.Response, appData?: AppGetParametersV1): Promise<AppData | undefined> =>
 {
     try
     {
         const {
             data: [appResult],
-        } = await AppMicroservice.v1.get({
+        } = await AppMicroservice.v1.get(appData ?? {
             id: (req.query.appId as string) || process.env.FILE_STORAGE_MICROSERVICE_APP_ID || undefined,
             searchName: req.query.appName as string || undefined,
         });
@@ -72,7 +80,8 @@ export const getCloudinaryData = async (
     res: express.Response,
     appData: AppData,
     from: 'query' | 'body',
-): Promise<GetCloudinaryDataResponse | undefined> =>
+    errorMessage: string,
+): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | undefined> =>
 {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
     const reqSource = (from === 'query') ? req.query : req.body;
@@ -112,12 +121,11 @@ export const getCloudinaryData = async (
 
         else
         {
-            const errMsg = 'Failed to retrieve file from Cloudinary';
-            logger.error(errMsg, err);
+            logger.error(errorMessage, err);
 
             InternalServerError.json({
                 res,
-                message: errMsg,
+                message: errorMessage,
                 error: err.toJson(),
             });
         }

@@ -25,6 +25,18 @@ export interface GetCloudinaryOptions
     nestedFolders: string;
     fileName: string;
     options?: Omit<CloudinaryOptions, 'effect'>;
+};
+
+export interface UploadCloudinaryOptions
+{
+    appId: string | undefined;
+    nestedFolders: string;
+    file: {
+        dataUri?: string;
+        fileName?: string;
+        url?: string;
+    };
+    options?: Pick<CloudinaryOptions, 'overwrite'>;
 }
 
 interface DeleteResponse
@@ -74,16 +86,7 @@ export class CloudinaryController
         options = {
             overwrite: false,
         },
-    }: {
-        appId: string | undefined;
-        nestedFolders: string;
-        file: {
-            dataUri?: string;
-            fileName?: string;
-            url?: string;
-        };
-        options?: Pick<CloudinaryOptions, 'overwrite'>;
-    }): Promise<UploadApiResponse>
+    }: UploadCloudinaryOptions): Promise<UploadApiResponse>
     {
         try
         {
