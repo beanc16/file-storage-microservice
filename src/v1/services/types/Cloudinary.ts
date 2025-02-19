@@ -1,4 +1,4 @@
-// Cloudinary returns "any" for most responses, so define the types manually
+// The Cloudinary SDK returns "any" for most responses, so define the types manually
 
 export interface CloudinaryResource
 {
