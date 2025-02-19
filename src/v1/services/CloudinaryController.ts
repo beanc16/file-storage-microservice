@@ -53,6 +53,14 @@ export interface RenameCloudinaryOptions
     options?: Pick<CloudinaryOptions, 'invalidate'>;
 }
 
+export interface DeleteCloudinaryOptions
+{
+    appId: string | undefined;
+    nestedFolders: string;
+    fileName: string;
+    options?: Pick<CloudinaryOptions, 'invalidate'>;
+}
+
 interface DeleteResponse
 {
     result: string;
@@ -199,12 +207,7 @@ export class CloudinaryController
         options = {
             invalidate: true,
         },
-    }: {
-        appId: string | undefined;
-        nestedFolders: string;
-        fileName: string;
-        options?: Pick<CloudinaryOptions, 'invalidate'>;
-    }): Promise<DeleteResponse>
+    }: DeleteCloudinaryOptions): Promise<DeleteResponse>
     {
         try
         {

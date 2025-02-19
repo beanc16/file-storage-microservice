@@ -15,6 +15,7 @@ import express from 'express';
 import { JsonError } from '../errors/JsonError.js';
 import {
     CloudinaryController,
+    type DeleteCloudinaryOptions,
     type GetCloudinaryOptions,
     type RenameCloudinaryOptions,
     type UploadCloudinaryOptions,
@@ -82,7 +83,7 @@ export const getCloudinaryData = async (
     appData: AppData,
     from: 'query' | 'body',
     errorMessage: string,
-): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | undefined> =>
+): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | DeleteCloudinaryOptions | undefined> =>
 {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
     const reqSource = (from === 'query') ? req.query : req.body;
