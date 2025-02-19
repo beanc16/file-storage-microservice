@@ -10,6 +10,6 @@ fileRoutes.use(bodyParser.urlencoded({ extended: true })); // for parsing applic
 
 fileRoutes.get('/', handlers.getFiles);
 fileRoutes.post('/upload', handlers.uploadFile);
-fileRoutes.post('/rename', handlers.renameFile);
-fileRoutes.post('/delete', handlers.deleteFile);
-fileRoutes.post('/delete-bulk', handlers.deleteBulk);
+fileRoutes.patch('/rename', handlers.renameFile);
+fileRoutes.delete('/delete', handlers.deleteFile);
+fileRoutes.delete('/delete-bulk', handlers.deleteBulk);
