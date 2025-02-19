@@ -13,7 +13,6 @@
     "build": "rm -rf api && tsc",
     "start": "node api/index.js",
     "start:dev": "node --loader ts-node/esm --watch src/index.js",
-    "start-test-server": "nodemon src/test/testServer.js",
     "lint": "eslint --cache --ext js --ext ts ./",
     "lint:fix": "eslint --cache --fix --ext js --ext ts ./",
     "test": "jest --passWithNoTests --detectOpenHandles",
