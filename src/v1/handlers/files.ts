@@ -5,6 +5,7 @@ import express from 'express';
 import {
     CloudinaryController,
     type CloudinaryOptions,
+    type DeleteBulkCloudinaryOptions,
     type DeleteCloudinaryOptions,
     type RenameCloudinaryOptions,
     type UploadCloudinaryOptions,
@@ -245,6 +246,45 @@ export const deleteFile = async (req: express.Request, res: express.Response): P
         return undefined;
     }
     await CloudinaryController.delete(cloudinaryData);
+
+    Success.json({
+        res,
+        message: 'Successfully deleted file from Cloudinary',
+    });
+    return undefined;
+};
+
+export const deleteBulk = async (req: express.Request, res: express.Response): Promise<void> =>
+{
+    try
+    {
+        validateJoiSchema(deleteFilesSchema, req.body);
+    }
+    catch (error)
+    {
+        sendQueryValidationError(res, error as Error);
+    }
+
+    const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
+
+    if (!appData)
+    {
+        return undefined;
+    }
+
+    const cloudinaryData = await getCloudinaryData(
+        req,
+        res,
+        appData,
+        'body',
+        'Failed to save file to Cloudinary',
+    ) as DeleteBulkCloudinaryOptions | undefined;
+
+    if (!cloudinaryData)
+    {
+        return undefined;
+    }
+    await CloudinaryController.deleteBulk(cloudinaryData);
 
     Success.json({
         res,

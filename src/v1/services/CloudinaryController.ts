@@ -66,6 +66,13 @@ interface DeleteResponse
     result: string;
 }
 
+export interface DeleteBulkCloudinaryOptions
+{
+    appId: string | undefined;
+    nestedFolders: string;
+    olderThanInDays: number;
+}
+
 interface DeleteBulkResponse
 {
     numOfFilesDeleted: number;
@@ -228,11 +235,7 @@ export class CloudinaryController
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
         olderThanInDays = 7,
-    }: {
-        appId: string | undefined;
-        nestedFolders: string;
-        olderThanInDays: number;
-    }): Promise<DeleteBulkResponse>
+    }: DeleteBulkCloudinaryOptions): Promise<DeleteBulkResponse>
     {
         try
         {

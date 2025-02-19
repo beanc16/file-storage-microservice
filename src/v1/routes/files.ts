@@ -5,10 +5,11 @@ import * as handlers from '../handlers/files.js';
 
 export const fileRoutes = express();
 
+fileRoutes.use(bodyParser.json());                         // for parsing application/json
+fileRoutes.use(bodyParser.urlencoded({ extended: true })); // for parsing application/xwww-form-urlencoded
+
 fileRoutes.get('/', handlers.getFiles);
 fileRoutes.post('/upload', handlers.uploadFile);
 fileRoutes.post('/rename', handlers.renameFile);
 fileRoutes.post('/delete', handlers.deleteFile);
-
-fileRoutes.use(bodyParser.json());                         // for parsing application/json
-fileRoutes.use(bodyParser.urlencoded({ extended: true })); // for parsing application/xwww-form-urlencoded
+fileRoutes.post('/delete-bulk', handlers.deleteBulk);
