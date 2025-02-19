@@ -15,7 +15,6 @@ interface ToJsonOptions
 
 export interface ToJsonResponse
 {
-    name: string;
     message: string;
     stackTrace?: string;
     statusCode?: number;
@@ -43,7 +42,6 @@ export class JsonError extends Error
     public toJson({ includeStackTrace = false, includeStatusCode = false }: ToJsonOptions = {}): ToJsonResponse
     {
         const result: ToJsonResponse = {
-            name: this.name,
             message: this.message,
         };
 
