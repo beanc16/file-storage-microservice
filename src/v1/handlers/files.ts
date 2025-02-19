@@ -136,11 +136,11 @@ export const uploadFile = async (req: express.Request, res: express.Response): P
     const result = await CloudinaryController.upload(cloudinaryData);
 
     const {
-        query: {
+        body: {
             imageOptions,
         },
     } = req as unknown as {
-        query: {
+        body: {
             imageOptions: CloudinaryOptions | undefined;
         };
     };
