@@ -16,6 +16,7 @@ import { JsonError } from '../errors/JsonError.js';
 import {
     CloudinaryController,
     type GetCloudinaryOptions,
+    type RenameCloudinaryOptions,
     type UploadCloudinaryOptions,
 } from './CloudinaryController.js';
 import type { CloudinaryResource } from './types/Cloudinary.js';
@@ -81,7 +82,7 @@ export const getCloudinaryData = async (
     appData: AppData,
     from: 'query' | 'body',
     errorMessage: string,
-): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | undefined> =>
+): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | undefined> =>
 {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
     const reqSource = (from === 'query') ? req.query : req.body;

@@ -5,16 +5,18 @@ import express from 'express';
 import {
     CloudinaryController,
     type CloudinaryOptions,
+    type RenameCloudinaryOptions,
     type UploadCloudinaryOptions,
 } from '../services/CloudinaryController.js';
 import {
     getAppData,
     getCloudinaryData,
-    GetCloudinaryDataResponse,
+    type GetCloudinaryDataResponse,
     sendQueryValidationError,
 } from '../services/responseHelpers.js';
 import {
     getFilesSchema,
+    renameFilesSchema,
     uploadFilesSchema,
     validateJoiSchema,
 } from '../validation/index.js';
@@ -163,6 +165,48 @@ export const uploadFile = async (req: express.Request, res: express.Response): P
         message: 'Successfully saved file to Cloudinary',
         data: {
             url: upscaledUrl,
+        },
+    });
+    return undefined;
+};
+
+export const renameFile = async (req: express.Request, res: express.Response): Promise<void> =>
+{
+    try
+    {
+        validateJoiSchema(renameFilesSchema, req.body);
+    }
+    catch (error)
+    {
+        sendQueryValidationError(res, error as Error);
+    }
+
+    const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
+
+    if (!appData)
+    {
+        return undefined;
+    }
+
+    const cloudinaryData = await getCloudinaryData(
+        req,
+        res,
+        appData,
+        'body',
+        'Failed to save file to Cloudinary',
+    ) as RenameCloudinaryOptions | undefined;
+
+    if (!cloudinaryData)
+    {
+        return undefined;
+    }
+    const result = await CloudinaryController.rename(cloudinaryData);
+
+    Success.json({
+        res,
+        message: 'Successfully renamed file on Cloudinary',
+        data: {
+            url: result.url,
         },
     });
     return undefined;

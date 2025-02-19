@@ -39,6 +39,20 @@ export interface UploadCloudinaryOptions
     options?: Pick<CloudinaryOptions, 'overwrite'>;
 }
 
+export interface RenameCloudinaryOptions
+{
+    appId: string | undefined;
+    old: {
+        nestedFolders: string;
+        fileName: string;
+    };
+    new: {
+        nestedFolders: string;
+        fileName: string;
+    };
+    options?: Pick<CloudinaryOptions, 'invalidate'>;
+}
+
 interface DeleteResponse
 {
     result: string;
@@ -156,18 +170,7 @@ export class CloudinaryController
         options = {
             invalidate: true,
         },
-    }: {
-        appId: string | undefined;
-        old: {
-            nestedFolders: string;
-            fileName: string;
-        };
-        new: {
-            nestedFolders: string;
-            fileName: string;
-        };
-        options?: Pick<CloudinaryOptions, 'invalidate'>;
-    }): Promise<CloudinaryResource>
+    }: RenameCloudinaryOptions): Promise<CloudinaryResource>
     {
         try
         {
