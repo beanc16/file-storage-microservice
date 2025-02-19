@@ -17,16 +17,15 @@
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "skipLibCheck": true,
-        "experimentalDecorators": true,
-        "allowJs": true,
+        "allowJs": false,
     },
     "include": [
         "src",
+        "./index.ts",
     ],
     "exclude": [
         "node_modules",
         "api",
-        "src/test",
         "uploads",
     ],
     "ts-node": {

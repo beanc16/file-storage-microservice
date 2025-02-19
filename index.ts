@@ -3,8 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
-import { errorRoutes } from './all/routes/errors.js';
-import { v1Routes } from './v1/index.js';
+import { errorRoutes } from './src/all/routes/errors.js';
+import { v1Routes } from './src/v1/index.js';
 
 // Setup
 const { errorHandler, logEndpointDuration } = expressLogging;
