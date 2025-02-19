@@ -78,13 +78,21 @@ export const getAppData = async (req: express.Request, res: express.Response, ap
     }
 };
 
-export const getCloudinaryData = async (
-    req: express.Request,
-    res: express.Response,
-    appData: AppData,
-    from: 'query' | 'body',
-    errorMessage: string,
-): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | DeleteCloudinaryOptions | DeleteBulkCloudinaryOptions | undefined> =>
+export const getCloudinaryData = async ({
+    req,
+    res,
+    appData,
+    from,
+    getFromCloudinary,
+    errorMessage,
+}: {
+    req: express.Request;
+    res: express.Response;
+    appData: AppData;
+    from: 'query' | 'body';
+    getFromCloudinary: boolean;
+    errorMessage: string;
+}): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | DeleteCloudinaryOptions | DeleteBulkCloudinaryOptions | undefined> =>
 {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
     const reqSource = (from === 'query') ? req.query : req.body;
@@ -101,6 +109,11 @@ export const getCloudinaryData = async (
         ...data,
         appId,
     } as GetCloudinaryOptions;
+
+    if (!getFromCloudinary)
+    {
+        return cloudinaryData;
+    }
 
     try
     {

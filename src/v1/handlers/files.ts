@@ -17,6 +17,7 @@ import {
     sendQueryValidationError,
 } from '../services/responseHelpers.js';
 import {
+    deleteBulkSchema,
     deleteFilesSchema,
     getFilesSchema,
     renameFilesSchema,
@@ -33,6 +34,7 @@ export const getFiles = async (req: express.Request, res: express.Response): Pro
     catch (error)
     {
         sendQueryValidationError(res, error as Error);
+        return undefined;
     }
 
     const appData = await getAppData(req, res);
@@ -42,13 +44,14 @@ export const getFiles = async (req: express.Request, res: express.Response): Pro
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(
+    const cloudinaryData = await getCloudinaryData({
         req,
         res,
         appData,
-        'query',
-        'Failed to retrieve file from Cloudinary',
-    ) as GetCloudinaryDataResponse | undefined;
+        from: 'query',
+        getFromCloudinary: true,
+        errorMessage: 'Failed to retrieve file from Cloudinary',
+    }) as GetCloudinaryDataResponse | undefined;
 
     if (!cloudinaryData)
     {
@@ -107,6 +110,7 @@ export const uploadFile = async (req: express.Request, res: express.Response): P
     catch (error)
     {
         sendQueryValidationError(res, error as Error);
+        return undefined;
     }
 
     const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
@@ -116,13 +120,14 @@ export const uploadFile = async (req: express.Request, res: express.Response): P
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(
+    const cloudinaryData = await getCloudinaryData({
         req,
         res,
         appData,
-        'body',
-        'Failed to save file to Cloudinary',
-    ) as UploadCloudinaryOptions | undefined;
+        from: 'body',
+        getFromCloudinary: false,
+        errorMessage: 'Failed to save file to Cloudinary',
+    }) as UploadCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
     {
@@ -182,6 +187,7 @@ export const renameFile = async (req: express.Request, res: express.Response): P
     catch (error)
     {
         sendQueryValidationError(res, error as Error);
+        return undefined;
     }
 
     const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
@@ -191,13 +197,14 @@ export const renameFile = async (req: express.Request, res: express.Response): P
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(
+    const cloudinaryData = await getCloudinaryData({
         req,
         res,
         appData,
-        'body',
-        'Failed to save file to Cloudinary',
-    ) as RenameCloudinaryOptions | undefined;
+        from: 'body',
+        getFromCloudinary: false,
+        errorMessage: 'Failed to save file to Cloudinary',
+    }) as RenameCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
     {
@@ -224,6 +231,7 @@ export const deleteFile = async (req: express.Request, res: express.Response): P
     catch (error)
     {
         sendQueryValidationError(res, error as Error);
+        return undefined;
     }
 
     const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
@@ -233,13 +241,14 @@ export const deleteFile = async (req: express.Request, res: express.Response): P
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(
+    const cloudinaryData = await getCloudinaryData({
         req,
         res,
         appData,
-        'body',
-        'Failed to save file to Cloudinary',
-    ) as DeleteCloudinaryOptions | undefined;
+        from: 'body',
+        getFromCloudinary: true,
+        errorMessage: 'Failed to save file to Cloudinary',
+    }) as DeleteCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
     {
@@ -258,11 +267,12 @@ export const deleteBulk = async (req: express.Request, res: express.Response): P
 {
     try
     {
-        validateJoiSchema(deleteFilesSchema, req.body);
+        validateJoiSchema(deleteBulkSchema, req.body);
     }
     catch (error)
     {
         sendQueryValidationError(res, error as Error);
+        return undefined;
     }
 
     const appData = await getAppData(req, res, (req.body as { app: AppGetParametersV1 }).app);
@@ -272,23 +282,25 @@ export const deleteBulk = async (req: express.Request, res: express.Response): P
         return undefined;
     }
 
-    const cloudinaryData = await getCloudinaryData(
+    const cloudinaryData = await getCloudinaryData({
         req,
         res,
         appData,
-        'body',
-        'Failed to save file to Cloudinary',
-    ) as DeleteBulkCloudinaryOptions | undefined;
+        from: 'body',
+        getFromCloudinary: false,
+        errorMessage: 'Failed to save file to Cloudinary',
+    }) as DeleteBulkCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
     {
         return undefined;
     }
-    await CloudinaryController.deleteBulk(cloudinaryData);
+    const result = await CloudinaryController.deleteBulk(cloudinaryData);
 
     Success.json({
         res,
-        message: 'Successfully deleted file from Cloudinary',
+        message: `Successfully deleted files older than ${cloudinaryData.olderThanInDays ?? 7} days old from Cloudinary`,
+        data: result,
     });
     return undefined;
 };
