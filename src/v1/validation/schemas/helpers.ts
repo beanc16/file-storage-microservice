@@ -64,7 +64,7 @@ export const imageOptions = Joi.object({
 
 // Nested Folders
 // Lowercase, hyphen, and forward slash
-const nestedFoldersRegex = /^[a-z\-/]+$/;
+const nestedFoldersRegex = /^[a-zA-Z0-9\-/]+$/;
 
 export const nestedFolders = Joi.string()
     .allow('')
