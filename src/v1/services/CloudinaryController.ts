@@ -1,4 +1,5 @@
 import appRoot from 'app-root-path';
+import axios from 'axios';
 import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
 import dayjs from 'dayjs';
 
@@ -87,20 +88,42 @@ export class CloudinaryController
         options = {},
     }: GetCloudinaryOptions): Promise<CloudinaryResource>
     {
+        let cloudinaryFilePath = '';
+
         try
         {
             // Get file paths
-            const {
-                cloudinaryFilePath,
-            } = this.constructFilePaths(appId, nestedFolders, fileName);
-
+            const filePaths = this.constructFilePaths(appId, nestedFolders, fileName);
+            cloudinaryFilePath = filePaths.cloudinaryFilePath;
             // Get file from cloudinary
             return await cloudinary.api.resource(cloudinaryFilePath, options) as CloudinaryResource;
         }
 
-        catch (error)
+        /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
+        catch (error: any)
         {
-            throw new JsonError(error as Error);
+            try
+            {
+                if (error.error.http_code === 404)
+                /* eslint-enable */
+                {
+                    // Generate url (without validating if it exists or not)
+                    const url = cloudinary.url(cloudinaryFilePath, { resource_type: 'video' });
+
+                    // Validate URL (will throw error if the file does not exist)
+                    await axios.get(url);
+
+                    return {
+                        url,
+                    } as CloudinaryResource;
+                }
+
+                throw error;
+            }
+            catch (error2)
+            {
+                throw new JsonError(error2 as Error);
+            }
         }
     }
 
