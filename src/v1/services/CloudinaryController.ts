@@ -105,10 +105,10 @@ export class CloudinaryController
             type: 'upload',
             resource_type: resourceType,
         }) as {
-            resources: CloudinaryResource[];
+            resources: Omit<CloudinaryResource, 'fileName'>[];
         };
 
-        return resources;
+        return resources.map((resource) => this.addFileNameToResource(resource, 'public_id'));
     }
 
     public static async get({
@@ -125,8 +125,10 @@ export class CloudinaryController
             // Get file paths
             const filePaths = this.constructFilePaths(appId, nestedFolders, fileName);
             cloudinaryFilePath = filePaths.cloudinaryFilePath;
+
             // Get file from cloudinary
-            return await cloudinary.api.resource(cloudinaryFilePath, options) as CloudinaryResource;
+            const resource = await cloudinary.api.resource(cloudinaryFilePath, options) as Omit<CloudinaryResource, 'fileName'>;
+            return this.addFileNameToResource(resource, 'public_id');
         }
 
         /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
@@ -143,9 +145,9 @@ export class CloudinaryController
                     // Validate URL (will throw error if the file does not exist)
                     await axios.get(url);
 
-                    return {
+                    return this.addFileNameToResource({
                         url,
-                    } as CloudinaryResource;
+                    } as CloudinaryResource, 'url');
                 }
 
                 throw error;
@@ -251,7 +253,8 @@ export class CloudinaryController
             } = this.constructFilePaths(appId, newNestedFolders, newFileName);
 
             // Rename file in cloudinary
-            return await cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options) as CloudinaryResource;
+            const resource = await cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options) as Omit<CloudinaryResource, 'fileName'>;
+            return this.addFileNameToResource(resource, 'public_id');
         }
 
         catch (error)
@@ -423,5 +426,16 @@ export class CloudinaryController
     {
         const regex = /(<img.+src=["'])(.*)(["'].+>)/ig;
         return htmlImgTag.replace(regex, '$2');
+    }
+
+    private static addFileNameToResource(cloudResource: Omit<CloudinaryResource, 'fileName'>, key: 'public_id' | 'url'): CloudinaryResource
+    {
+        const { [key]: value } = cloudResource;
+        const fileNameWithExtension = value.substring(value.lastIndexOf('/') + 1);
+
+        return {
+            ...cloudResource,
+            fileName: fileNameWithExtension.split('.').slice(0, -1).join('.') || fileNameWithExtension,
+        };
     }
 }

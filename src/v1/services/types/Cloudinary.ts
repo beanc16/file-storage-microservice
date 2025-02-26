@@ -20,6 +20,7 @@ export interface CloudinaryResource
     secure_url: string;
     asset_folder: string;
     display_name: string;
+    fileName: string;
 }
 
 export interface CloudinaryDestroyResponse

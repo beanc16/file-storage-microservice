@@ -73,16 +73,19 @@ export const getFilesInFolder = async (req: express.Request, res: express.Respon
             res,
             message: 'Successfully retrieved files in folder from Cloudinary',
             data: {
-                urls: cloudinaryDatas.map(({ url }) => url),
+                files: cloudinaryDatas.map(({ fileName, url }) =>
+                {
+                    return { fileName, url };
+                }),
             },
         });
         return undefined;
     }
 
-    const urls = cloudinaryDatas.map(({ fileName, url }) =>
+    const files = cloudinaryDatas.map(({ fileName, url }) =>
     {
         const fileExtension = CloudinaryController.getExtensionFromUrl(url);
-        return CloudinaryController.doImageOperation({
+        const upscaledUrl = CloudinaryController.doImageOperation({
             // eslint-disable-next-line no-underscore-dangle -- Allow the id to have an underscore
             appId: appData._id,
             nestedFolders,
@@ -92,13 +95,18 @@ export const getFilesInFolder = async (req: express.Request, res: express.Respon
             },
             options: imageOptions,
         });
+
+        return {
+            fileName,
+            url: upscaledUrl,
+        };
     });
 
     Success.json({
         res,
         message: 'Successfully retrieved files in folder from Cloudinary',
         data: {
-            urls,
+            files,
         },
     });
     return undefined;
