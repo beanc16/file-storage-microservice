@@ -14,16 +14,95 @@ import {
     getAppData,
     getCloudinaryData,
     type GetCloudinaryDataResponse,
+    getCloudinaryDatas,
     sendQueryValidationError,
 } from '../services/responseHelpers.js';
 import {
     deleteBulkSchema,
     deleteFilesSchema,
+    getFilesInFolderSchema,
     getFilesSchema,
     renameFilesSchema,
     uploadFilesSchema,
     validateJoiSchema,
 } from '../validation/index.js';
+
+export const getFilesInFolder = async (req: express.Request, res: express.Response): Promise<void> =>
+{
+    try
+    {
+        validateJoiSchema(getFilesInFolderSchema, req.query);
+    }
+    catch (error)
+    {
+        sendQueryValidationError(res, error as Error);
+        return undefined;
+    }
+
+    const appData = await getAppData(req, res);
+
+    if (!appData)
+    {
+        return undefined;
+    }
+
+    const cloudinaryDatas = await getCloudinaryDatas({
+        req,
+        res,
+        appData,
+        errorMessage: 'Failed to retrieve files in folder from Cloudinary',
+    });
+
+    if (!cloudinaryDatas)
+    {
+        return undefined;
+    }
+
+    const {
+        query: { nestedFolders, imageOptions },
+    } = req as unknown as {
+        query: {
+            nestedFolders: string;
+            imageOptions: CloudinaryOptions | undefined;
+        };
+    };
+
+    if (!imageOptions)
+    {
+        Success.json({
+            res,
+            message: 'Successfully retrieved files in folder from Cloudinary',
+            data: {
+                urls: cloudinaryDatas.map(({ url }) => url),
+            },
+        });
+        return undefined;
+    }
+
+    const urls = cloudinaryDatas.map(({ fileName, url }) =>
+    {
+        const fileExtension = CloudinaryController.getExtensionFromUrl(url);
+        return CloudinaryController.doImageOperation({
+            // eslint-disable-next-line no-underscore-dangle -- Allow the id to have an underscore
+            appId: appData._id,
+            nestedFolders,
+            file: {
+                fileName,
+                fileExtension,
+            },
+            options: imageOptions,
+        });
+    });
+
+    Success.json({
+        res,
+        message: 'Successfully retrieved files in folder from Cloudinary',
+        data: {
+            urls,
+        },
+    });
+    return undefined;
+};
 
 export const getFiles = async (req: express.Request, res: express.Response): Promise<void> =>
 {

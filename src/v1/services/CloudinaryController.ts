@@ -20,12 +20,20 @@ export interface CloudinaryOptions
     overwrite?: boolean;
 }
 
+export interface GetFilesInFolderCloudinaryOptions
+{
+    appId: string | undefined;
+    nestedFolders: string;
+    resourceType?: 'image' | 'video';
+}
+
 export interface GetCloudinaryOptions
 {
     appId: string | undefined;
     nestedFolders: string;
     fileName: string;
     options?: Omit<CloudinaryOptions, 'effect'>;
+    resourceType: 'image' | 'video';
 };
 
 export interface UploadCloudinaryOptions
@@ -81,6 +89,28 @@ interface DeleteBulkResponse
 
 export class CloudinaryController
 {
+    public static async getFilesInFolder({
+        appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
+        nestedFolders,
+        resourceType = 'image',
+    }: GetFilesInFolderCloudinaryOptions): Promise<CloudinaryResource[]>
+    {
+        const {
+            cloudinaryFilePath,
+        } = this.constructFilePaths(appId, nestedFolders);
+
+        const { resources = [] } = await cloudinary.api.resources({
+            prefix: cloudinaryFilePath,
+            max_results: 500,
+            type: 'upload',
+            resource_type: resourceType,
+        }) as {
+            resources: CloudinaryResource[];
+        };
+
+        return resources;
+    }
+
     public static async get({
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
@@ -262,17 +292,7 @@ export class CloudinaryController
     {
         try
         {
-            const {
-                cloudinaryFilePath,
-            } = this.constructFilePaths(appId, nestedFolders);
-
-            const { resources = [] } = await cloudinary.api.resources({
-                prefix: cloudinaryFilePath,
-                max_results: 500,
-                type: 'upload',
-            }) as {
-                resources: CloudinaryResource[];
-            };
+            const resources = await this.getFilesInFolder({ appId, nestedFolders });
 
             const { chunkedResourcesToDelete } = resources.reduce<{
                 chunkedResourcesToDelete: string[][];

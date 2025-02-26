@@ -9,6 +9,7 @@ fileRoutes.use(bodyParser.json());                         // for parsing applic
 fileRoutes.use(bodyParser.urlencoded({ extended: true })); // for parsing application/xwww-form-urlencoded
 
 fileRoutes.get('/', handlers.getFiles);
+fileRoutes.get('/folder', handlers.getFilesInFolder);
 fileRoutes.post('/upload', handlers.uploadFile);
 fileRoutes.patch('/rename', handlers.renameFile);
 fileRoutes.delete('/delete', handlers.deleteFile);

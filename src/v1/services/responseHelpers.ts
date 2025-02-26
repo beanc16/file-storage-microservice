@@ -78,6 +78,35 @@ export const getAppData = async (req: express.Request, res: express.Response, ap
     }
 };
 
+const getCloudinaryOptions = ({
+    req,
+    appData,
+    from,
+}: {
+    req: express.Request;
+    appData: AppData;
+    from: 'query' | 'body';
+}): GetCloudinaryOptions =>
+{
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
+    const reqSource = (from === 'query') ? req.query : req.body;
+
+    const {
+        app: _app,
+        appName: _appName,
+        resourceType = 'image',
+        ...data
+    } = reqSource as Record<string, unknown>;
+
+    const { _id: appId } = appData;
+
+    return {
+        ...data,
+        resourceType,
+        appId,
+    } as GetCloudinaryOptions;
+};
+
 export const getCloudinaryData = async ({
     req,
     res,
@@ -94,21 +123,11 @@ export const getCloudinaryData = async ({
     errorMessage: string;
 }): Promise<GetCloudinaryDataResponse | UploadCloudinaryOptions | RenameCloudinaryOptions | DeleteCloudinaryOptions | DeleteBulkCloudinaryOptions | undefined> =>
 {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Allow the results to be any
-    const reqSource = (from === 'query') ? req.query : req.body;
-
-    const {
-        app: _app,
-        appName: _appName,
-        ...data
-    } = reqSource as Record<string, unknown>;
-
-    const { _id: appId } = appData;
-
-    const cloudinaryData = {
-        ...data,
-        appId,
-    } as GetCloudinaryOptions;
+    const cloudinaryData = getCloudinaryOptions({
+        req,
+        appData,
+        from,
+    });
 
     if (!getFromCloudinary)
     {
@@ -131,6 +150,62 @@ export const getCloudinaryData = async ({
             NotFound.json({
                 res,
                 message: 'That file does not exist on Cloudinary',
+                error: err.toJson(),
+            });
+        }
+
+        else
+        {
+            logger.error(errorMessage, err);
+
+            InternalServerError.json({
+                res,
+                message: errorMessage,
+                error: err.toJson(),
+            });
+        }
+
+        return undefined;
+    }
+};
+
+export const getCloudinaryDatas = async ({
+    req,
+    res,
+    appData,
+    errorMessage,
+}: {
+    req: express.Request;
+    res: express.Response;
+    appData: AppData;
+    errorMessage: string;
+}): Promise<GetCloudinaryDataResponse[] | undefined> =>
+{
+    const cloudinaryData = getCloudinaryOptions({
+        req,
+        appData,
+        from: 'query',
+    });
+
+    try
+    {
+        const cloudinaryResults = await CloudinaryController.getFilesInFolder(cloudinaryData);
+        return cloudinaryResults.map((cloudinaryResult) =>
+        {
+            return { ...cloudinaryResult, ...cloudinaryData };
+        });
+    }
+
+    catch (error)
+    {
+        const err = error as JsonError;
+        const { statusCode } = err;
+
+        if (statusCode === 404)
+        {
+            NotFound.json({
+                res,
+                message: 'That folder does not exist on Cloudinary',
                 error: err.toJson(),
             });
         }
