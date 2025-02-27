@@ -448,7 +448,7 @@ export class CloudinaryController
         const { [key]: value } = cloudResource;
         const fileNameWithExtension = value.substring(value.lastIndexOf('/') + 1);
         const fileNameWithoutExtension = fileNameWithExtension.split('.').slice(0, -1).join('.') || fileNameWithExtension;
-        const fileNameWithoutQueryString = fileNameWithoutExtension.split('?').slice(0, -1).join('?');
+        const fileNameWithoutQueryString = fileNameWithoutExtension.split('?').slice(0, -1).join('?') || fileNameWithoutExtension;
 
         return {
             ...cloudResource,
