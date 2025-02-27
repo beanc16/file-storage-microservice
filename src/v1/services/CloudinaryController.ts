@@ -13,6 +13,8 @@ import type {
 
 cloudinary.config(cloudinaryConfigEnum);
 
+export type CloudinaryResourceType = 'image' | 'video';
+
 export interface CloudinaryOptions
 {
     effect: 'upscale';
@@ -24,7 +26,7 @@ export interface GetFilesInFolderCloudinaryOptions
 {
     appId: string | undefined;
     nestedFolders: string;
-    resourceType?: 'image' | 'video';
+    resourceType?: CloudinaryResourceType;
 }
 
 export interface GetCloudinaryOptions
@@ -45,6 +47,7 @@ export interface UploadCloudinaryOptions
         fileName?: string;
         url?: string;
     };
+    resourceType?: CloudinaryResourceType;
     options?: Pick<CloudinaryOptions, 'overwrite'>;
 }
 
@@ -167,6 +170,7 @@ export class CloudinaryController
             fileName,
             url,
         } = {},
+        resourceType = 'image',
         options = {
             overwrite: false,
         },
@@ -188,6 +192,7 @@ export class CloudinaryController
             return await cloudinary.uploader.upload((url || dataUri) as string, { // TODO: Update parameters to make one of these required later
                 ...options,
                 public_id: cloudinaryFilePath,
+                resource_type: resourceType,
             });
         }
 

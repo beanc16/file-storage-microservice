@@ -69,3 +69,5 @@ const nestedFoldersRegex = /^[a-zA-Z0-9\-/]+$/;
 export const nestedFolders = Joi.string()
     .allow('')
     .pattern(nestedFoldersRegex);
+
+export const resourceType = Joi.string().valid('image', 'video');

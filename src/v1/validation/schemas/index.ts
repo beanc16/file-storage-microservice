@@ -52,6 +52,7 @@ export const uploadFilesSchema = Joi.object({
     app: fileSchemas.app.required(),
     file: fileSchemas.file.required(),
     nestedFolders: fileSchemas.nestedFolders.optional(),
+    resourceType: fileSchemas.resourceType.optional(),
     imageOptions: fileSchemas.imageOptions.optional(),
 }).required();
 
