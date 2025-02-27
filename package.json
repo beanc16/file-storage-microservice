@@ -1,6 +1,6 @@
 {
   "name": "file-storage-microservice",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A microservice for storing files in the Cloud",
   "type": "module",
   "main": "api/index.js",
@@ -20,7 +20,9 @@
   },
   "eslintConfig": {
     "extends": "lintification",
-    "ignorePatterns": ["api"]
+    "ignorePatterns": [
+      "api"
+    ]
   },
   "dependencies": {
     "@beanc16/joi-helpers": "^0.5.0",
