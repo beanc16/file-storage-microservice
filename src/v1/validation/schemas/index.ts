@@ -72,6 +72,7 @@ export const deleteFilesSchema = Joi.object({
     app: fileSchemas.app.required(),
     fileName: fileSchemas.fileName.required(),
     nestedFolders: fileSchemas.nestedFolders.optional(),
+    resourceType: fileSchemas.resourceType.optional(),
 }).required();
 
 export const deleteBulkSchema = Joi.object({

@@ -70,6 +70,7 @@ export interface DeleteCloudinaryOptions
     appId: string | undefined;
     nestedFolders: string;
     fileName: string;
+    resourceType?: CloudinaryResourceType;
     options?: Pick<CloudinaryOptions, 'invalidate'>;
 }
 
@@ -272,6 +273,7 @@ export class CloudinaryController
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         nestedFolders,
         fileName,
+        resourceType = 'image',
         options = {
             invalidate: true,
         },
@@ -283,7 +285,10 @@ export class CloudinaryController
                 cloudinaryFilePath,
             } = this.constructFilePaths(appId, nestedFolders, fileName);
 
-            return await cloudinary.uploader.destroy(cloudinaryFilePath, options) as CloudinaryDestroyResponse;
+            return await cloudinary.uploader.destroy(cloudinaryFilePath, {
+                ...options,
+                resource_type: resourceType,
+            }) as CloudinaryDestroyResponse;
         }
 
         catch (error)
