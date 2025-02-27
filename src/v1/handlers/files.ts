@@ -290,7 +290,7 @@ export const renameFile = async (req: express.Request, res: express.Response): P
         appData,
         from: 'body',
         getFromCloudinary: false,
-        errorMessage: 'Failed to save file to Cloudinary',
+        errorMessage: 'Failed to rename file in Cloudinary',
     }) as RenameCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
@@ -334,7 +334,7 @@ export const deleteFile = async (req: express.Request, res: express.Response): P
         appData,
         from: 'body',
         getFromCloudinary: true,
-        errorMessage: 'Failed to save file to Cloudinary',
+        errorMessage: 'Failed to delete file in Cloudinary',
     }) as DeleteCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
@@ -375,7 +375,7 @@ export const deleteBulk = async (req: express.Request, res: express.Response): P
         appData,
         from: 'body',
         getFromCloudinary: false,
-        errorMessage: 'Failed to save file to Cloudinary',
+        errorMessage: 'Failed to bulk delete files in Cloudinary',
     }) as DeleteBulkCloudinaryOptions | undefined;
 
     if (!cloudinaryData)
