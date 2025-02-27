@@ -66,6 +66,7 @@ export const renameFilesSchema = Joi.object({
         fileName: fileSchemas.fileName.required(),
         nestedFolders: fileSchemas.nestedFolders.optional(),
     }).required(),
+    resourceType: fileSchemas.resourceType.optional(),
 }).required();
 
 export const deleteFilesSchema = Joi.object({

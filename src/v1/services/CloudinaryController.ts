@@ -62,6 +62,7 @@ export interface RenameCloudinaryOptions
         nestedFolders: string;
         fileName: string;
     };
+    resourceType?: CloudinaryResourceType;
     options?: Pick<CloudinaryOptions, 'invalidate'>;
 }
 
@@ -243,6 +244,7 @@ export class CloudinaryController
         appId = process.env.FILE_STORAGE_MICROSERVICE_APP_ID,
         old: { nestedFolders: oldNestedFolders, fileName: oldFileName },
         new: { nestedFolders: newNestedFolders, fileName: newFileName },
+        resourceType = 'image',
         options = {
             invalidate: true,
         },
@@ -259,7 +261,10 @@ export class CloudinaryController
             } = this.constructFilePaths(appId, newNestedFolders, newFileName);
 
             // Rename file in cloudinary
-            const resource = await cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, options) as Omit<CloudinaryResource, 'fileName'>;
+            const resource = await cloudinary.uploader.rename(oldCloudinaryFilePath, newCloudinaryFilePath, {
+                ...options,
+                resource_type: resourceType,
+            }) as Omit<CloudinaryResource, 'fileName'>;
             return this.addFileNameToResource(resource, 'public_id');
         }
 
