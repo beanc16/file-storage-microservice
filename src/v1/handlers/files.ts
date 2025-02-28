@@ -1,5 +1,5 @@
 import type { AppGetParametersV1 } from '@beanc16/microservices-abstraction';
-import { Success } from 'dotnet-responses';
+import { InternalServerError, Success } from 'dotnet-responses';
 import express from 'express';
 
 import {
@@ -298,6 +298,18 @@ export const renameFile = async (req: express.Request, res: express.Response): P
         return undefined;
     }
     const result = await CloudinaryController.rename(cloudinaryData);
+
+    if (!result)
+    {
+        InternalServerError.json({
+            res,
+            message: 'Failed to rename file in Cloudinary',
+            error: {
+                message: 'Request failed with status code 404',
+            },
+        });
+        return undefined;
+    }
 
     Success.json({
         res,

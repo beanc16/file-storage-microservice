@@ -248,7 +248,7 @@ export class CloudinaryController
         options = {
             invalidate: true,
         },
-    }: RenameCloudinaryOptions): Promise<CloudinaryResource>
+    }: RenameCloudinaryOptions): Promise<CloudinaryResource | undefined>
     {
         try
         {
@@ -268,9 +268,16 @@ export class CloudinaryController
             return this.addFileNameToResource(resource, 'public_id');
         }
 
-        catch (error)
+        catch (err)
         {
-            throw new JsonError(error as Error);
+            const error = err as Error & { http_code: number };
+
+            if (error.message.toLowerCase().startsWith('resource not found'))
+            {
+                return undefined;
+            }
+
+            throw new JsonError(error);
         }
     }
 
