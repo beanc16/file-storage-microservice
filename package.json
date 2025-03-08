@@ -1,6 +1,6 @@
 {
   "name": "file-storage-microservice",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "A microservice for storing files in the Cloud",
   "type": "module",
   "main": "api/index.js",
