@@ -13,7 +13,7 @@ export const app = Joi.alternatives().try(
 );
 
 // File Name
-const fileNameRegex = /^[\w- ]+$/;
+const fileNameRegex = /^[\w-'". ]+$/;
 
 export const fileName = Joi.string().pattern(fileNameRegex);
 
@@ -21,11 +21,11 @@ export const fileName = Joi.string().pattern(fileNameRegex);
 export const file = Joi.alternatives().try(
     Joi.object({
         dataUri: Joi.string().required(),
-        fileName: Joi.string().required(),
+        fileName: fileName.required(),
     }).required(),
     Joi.object({
         url: Joi.string().required(),
-        fileName: Joi.string().optional(),
+        fileName: fileName.optional(),
     }).required(),
 );
 
