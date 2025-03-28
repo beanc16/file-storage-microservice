@@ -14,7 +14,7 @@ export const app = Joi.alternatives().try(
 
 // File Name
 // eslint-disable-next-line no-useless-escape
-const fileNameRegex = /^[\w-'".!@#$%^&*()_+=~`{}\[\]:;,/?<>|=+ ]+$/;
+const fileNameRegex = /^[\w-'".!@#$%^&*()_+=~`{}\[\]:;,?<>|=+ ]+$/;
 
 export const fileName = Joi.string().pattern(fileNameRegex);
 
