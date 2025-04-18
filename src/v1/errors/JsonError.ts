@@ -2,9 +2,11 @@ interface NestedErrorInfo
 {
     error?: Error & {
         http_code: number;
+        status?: number;
     };
     message?: string;
     http_code?: number;
+    status?: number;
 }
 
 interface ToJsonOptions
@@ -33,9 +35,17 @@ export class JsonError extends Error
         {
             this.statusCode = err.http_code;
         }
+        else if (err.status)
+        {
+            this.statusCode = err.status;
+        }
         else if (err.error && err.error.http_code)
         {
             this.statusCode = err.error.http_code;
+        }
+        else if (err.error && err.error.status)
+        {
+            this.statusCode = err.error.status;
         }
     }
 
